@@ -1,0 +1,101 @@
+{
+  "actId": 2,
+  "title": "Commitment or Complacency? Terraform's Human-Centric Bet",
+  "timeContext": "Q2 2025 (2 weeks post-decision)",
+  "firmFacts": {},
+  "operationalSignals": {
+    "supplierSatisfaction": "+12% YoY supplier satisfaction",
+    "contractStability": "74% contracts secured at reduced volatility terms",
+    "marginStabilization": "+0.4% margin improvement",
+    "costPressures": "Cost pressures persist",
+    "competitiveGap": "Competitors gain agility via digital procurement tools"
+  },
+  "stakeholderVoices": [
+    {
+      "name": "Operations & Finance Pressure",
+      "role": "Operations/Finance",
+      "stance": "pressing",
+      "quote": "Internal push for stronger digital investment. Operations team reports inefficiencies compared to competitors using AI tools. Finance highlights margin pressure."
+    },
+    {
+      "name": "Supplier Relations Update",
+      "role": "Suppliers",
+      "stance": "supportive",
+      "quote": "Q1 renegotiations completed; 74% contracts secured at reduced volatility terms. Supplier satisfaction +12% YoY. Suppliers appreciate the relationship-first approach."
+    },
+    {
+      "name": "Competitor Intelligence",
+      "role": "Market",
+      "stance": "warning",
+      "quote": "Rumors: HexaBuild will release fully automated AI supply stack in Q3. This could give them significant competitive advantage in cost and speed."
+    },
+    {
+      "name": "Board Expectations",
+      "role": "Board",
+      "stance": "seeking clarity",
+      "quote": "Board wants clarity on long-term strategy. They're asking whether the human-centric approach can scale and remain competitive."
+    },
+    {
+      "name": "Procurement Team Morale",
+      "role": "Procurement",
+      "stance": "positive",
+      "quote": "Procurement team morale improved significantly. Team feels valued and reports better work-life balance without AI pressure."
+    }
+  ],
+  "externalSignals": [
+    {
+      "source": "Competitor Intelligence",
+      "keyPoints": [
+        "HexaBuild rumored to release fully automated AI supply stack in Q3",
+        "Potential competitive advantage in cost and speed"
+      ]
+    }
+  ],
+  "decisionOptions": [
+    {
+      "id": "B1",
+      "title": "Double Down on Human-Centric Strategy",
+      "shortLabel": "Double down",
+      "implications": [
+        "€1.5M training investment",
+        "Supplier alliance program",
+        "PR campaign",
+        "Strengthens relationships",
+        "No AI adoption",
+        "Competitive risk remains"
+      ]
+    },
+    {
+      "id": "B2",
+      "title": "Quietly Explore Hybrid Digital Tools",
+      "shortLabel": "Quiet hybrid scan",
+      "implications": [
+        "Market research phase",
+        "Scout team formation",
+        "Efficiency focus",
+        "Low-key approach",
+        "Gradual transition",
+        "Balanced strategy"
+      ]
+    },
+    {
+      "id": "B3",
+      "title": "Reconsider Full Transformation Amid Market Signals",
+      "shortLabel": "Reconsider SCOS",
+      "implications": [
+        "Board review process",
+        "Revisit SCOS proposal",
+        "Change readiness assessment",
+        "Strategic pivot possible",
+        "Time investment required",
+        "Uncertain outcome"
+      ]
+    }
+  ],
+  "constraints": [
+    "Margins stabilized only modestly (+0.4%)",
+    "Competitive gap widening due to digital procurement tools",
+    "Board demands clarity on long-term strategy",
+    "Supplier relationships and morale are currently strong"
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "actId": 4,
+  "title": "Defining Terraform's Path Forward",
+  "timeContext": "Post-crisis strategic reset",
+  "firmFacts": {
+    "revenue": "€410M (-2.4%)",
+    "grossMargin": "36.9%",
+    "supplierLoyalty": "Strengthened; preferential allocation secured",
+    "unionClimate": "Stabilized; strike risk reduced",
+    "capitalFlexibility": "Constrained"
+  },
+  "operationalSignals": {
+    "trustSignal": "Supplier and employee trust improved",
+    "financialPressure": "Margin pressure persists",
+    "capabilityGap": "Competitors closing efficiency gaps through automation"
+  },
+  "stakeholderVoices": [
+    {
+      "name": "Board Chair",
+      "role": "Board",
+      "stance": "competitive concern",
+      "quote": "We protected culture—but can we compete?"
+    },
+    {
+      "name": "CFO",
+      "role": "Finance",
+      "stance": "constraint",
+      "quote": "Sustained margin pressure will limit strategic freedom."
+    },
+    {
+      "name": "HR",
+      "role": "HR",
+      "stance": "morale recovery",
+      "quote": "Morale is recovering, but growth narrative matters for retention."
+    },
+    {
+      "name": "Engineering",
+      "role": "Engineering",
+      "stance": "capability gap",
+      "quote": "Capability gaps may become structural if delayed."
+    },
+    {
+      "name": "Supplier Council",
+      "role": "Suppliers",
+      "stance": "trusting",
+      "quote": "We trust Terraform—but modernization matters too."
+    }
+  ],
+  "externalSignals": [
+    {
+      "source": "SmartIndustry Weekly (Analyst Note)",
+      "keyPoints": [
+        "Terraform stands at a strategic inflection point",
+        "Next move defines disciplined niche vs platform vs innovation challenger"
+      ]
+    }
+  ],
+  "decisionOptions": [
+    {
+      "id": "Innovation",
+      "title": "OPTION 1 — Innovation-Oriented Transformation",
+      "shortLabel": "Innovation",
+      "implications": [
+        "Significant investment in AI, robotics R&D, and analytics",
+        "Major reskilling and talent development",
+        "Longer payback horizons and execution risk",
+        "Potential for strong differentiation if successful",
+        "High upside with high demand on leadership",
+        "Requires strong learning capacity"
+      ]
+    },
+    {
+      "id": "Ecosystem",
+      "title": "OPTION 2 — Ecosystem-Oriented Integration",
+      "shortLabel": "Ecosystem",
+      "implications": [
+        "Deep partnerships with suppliers and AI vendors",
+        "Shared standards and co-investment",
+        "Reduced internal complexity",
+        "Strategic dependence on partner alignment",
+        "Adaptive and scalable approach",
+        "Governance-intensive model"
+      ]
+    },
+    {
+      "id": "Efficiency",
+      "title": "OPTION 3 — Efficiency-Driven Consolidation",
+      "shortLabel": "Efficiency",
+      "implications": [
+        "Tight cost controls and selective automation",
+        "Exit from non-core activities",
+        "Predictable cash flows",
+        "Incremental innovation focused on efficiency",
+        "Stable and defensible position",
+        "Limits long-term optionality"
+      ]
+    }
+  ],
+  "constraints": [
+    "Margin pressure persists and capital flexibility is constrained",
+    "Competitors accelerating automation and scale",
+    "Board questions competitiveness despite trust gains"
+  ]
+}

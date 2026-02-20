@@ -1,0 +1,108 @@
+{
+  "actId": 3,
+  "title": "The Loyalty vs. Logic Dilemma",
+  "timeContext": "Act III crisis window",
+  "firmFacts": {},
+  "operationalSignals": {
+    "terminationNotice": "SCOS flagged PolskaStal as high-risk/high-cost and issued a 60-day termination notice",
+    "relationshipTenure": "15-year partnership at risk",
+    "leadTimeRisk": "Alternative supplier lead times 8–12 weeks",
+    "productionDelayRisk": "Losing PolskaStal would cause immediate production delays for flagship robotics line"
+  },
+  "stakeholderVoices": [
+    {
+      "name": "CFO Warning",
+      "role": "Finance",
+      "stance": "hold the line",
+      "quote": "The termination notice was issued based on cost optimization algorithms. Reinstating PolskaStal would undermine our AI-driven efficiency gains and signal inconsistency to other suppliers."
+    },
+    {
+      "name": "Procurement Warning",
+      "role": "Procurement",
+      "stance": "caution on supply",
+      "quote": "Sourcing alternative suppliers will require immediate requalification processes. Lead times for specialized steel components are typically 8-12 weeks. Production delays are likely if we proceed with termination."
+    },
+    {
+      "name": "PolskaStal CEO Reaction",
+      "role": "Supplier",
+      "stance": "angry",
+      "quote": "We received your termination notice via automated system. After 15 years of partnership, this feels like a betrayal. We have received an exclusive offer from HexaBuild and are seriously considering it."
+    },
+    {
+      "name": "Board Expectation",
+      "role": "Board",
+      "stance": "decisive",
+      "quote": "The board expects decisive action. This situation tests our commitment to AI-driven transformation. We need clarity on how to balance efficiency with relationship management."
+    },
+    {
+      "name": "Competitor Intel",
+      "role": "Market",
+      "stance": "competitive threat",
+      "quote": "Market intelligence suggests HexaBuild has made a lucrative exclusive offer to PolskaStal. If they secure this partnership, it could strengthen their competitive position significantly."
+    }
+  ],
+  "externalSignals": [
+    {
+      "source": "Competitor intelligence",
+      "keyPoints": [
+        "HexaBuild has made a lucrative exclusive offer to PolskaStal",
+        "Losing PolskaStal strengthens competitor position"
+      ]
+    },
+    {
+      "source": "Email from PolskaStal CEO",
+      "keyPoints": [
+        "Subject: Urgent: Contract Renegotiation Request - 15 Years of Partnership",
+        "Body: Dear Terraform Leadership Team, I am writing to express my deep disappointment regarding the termination notice we received via your automated system. After 15 years of partnership, during which we have consistently delivered high-quality steel components and supported your production needs, this impersonal termination feels like a betrayal of our long-standing relationship. We have always valued our partnership with Terraform and have gone above and beyond to meet your requirements, even during challenging market conditions. The fact that this decision was made by an algorithm without any prior consultation or discussion is deeply concerning. We believe that 15 years of reliable service and partnership deserves more than an automated termination notice. Therefore, we formally request an immediate renegotiation of our contract terms. We are open to discussing pricing adjustments, delivery terms, and other conditions that would allow us to continue this valuable partnership. However, I must be transparent: we have received an exclusive offer from HexaBuild that is very attractive. We would prefer to continue working with Terraform, but we need to see a commitment to our relationship that matches our commitment to you over the past 15 years. I request a meeting within the next week to discuss this matter. Our relationship deserves a human conversation, not an automated decision. Best regards, [PolskaStal CEO]"
+      ]
+    }
+  ],
+  "decisionOptions": [
+    {
+      "id": "X",
+      "title": "Enforce the System's Logic / Hold the Line on Cost",
+      "shortLabel": "Hold the line",
+      "implications": [
+        "Affirms data-driven decision-making",
+        "Immediate alternative supplier sourcing required",
+        "Higher short-term risk and costs",
+        "Potential production delays during transition",
+        "Sets precedent for cost discipline",
+        "May damage other supplier relationships"
+      ]
+    },
+    {
+      "id": "Y",
+      "title": "Broker a Human Deal / Hybrid Solution",
+      "shortLabel": "Hybrid deal",
+      "implications": [
+        "Personal CEO intervention required",
+        "Compromise solution (8% increase or conditional reinstatement)",
+        "6-month performance review clause",
+        "Balances relationship and cost concerns",
+        "Temporary bridge solution",
+        "May set precedent for future negotiations"
+      ]
+    },
+    {
+      "id": "Z",
+      "title": "Preserve the Relationship / Revert to Tradition",
+      "shortLabel": "Preserve relationship",
+      "implications": [
+        "Full 15% price increase approved",
+        "Overrules AI system decision",
+        "Internal statement on partnership values",
+        "Personal visit to supplier",
+        "Protection from future automated cuts",
+        "Significant Q3 profit impact",
+        "Reinforces relationship-first approach"
+      ]
+    }
+  ],
+  "constraints": [
+    "Production delay risk if PolskaStal is lost",
+    "Precedent-setting decision for future supplier negotiations",
+    "Board expects clarity on AI-driven transformation",
+    "HexaBuild is actively courting PolskaStal"
+  ]
+}

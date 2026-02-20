@@ -1,0 +1,127 @@
+{
+  "actId": 1,
+  "title": "Terraform Industries' Crossroads — Strategic Trigger (SCOS decision)",
+  "timeContext": "Q1 2025",
+  "firmFacts": {
+    "founded": 1989,
+    "hq": "Stuttgart, Germany",
+    "sector": "Industrial robotics for construction & infrastructure",
+    "coreProducts": [
+      "Smart robotic arms for modular construction",
+      "Autonomous pavement repair units",
+      "Site analytics + safety monitoring systems"
+    ],
+    "revenue2024": 420000000,
+    "profitMarginCurrent": 37.8,
+    "profitMarginPrevious": 41
+  },
+  "operationalSignals": {
+    "rawMaterialCostsYoY": "20% increase",
+    "inventoryHoldingPeriodDays": 79,
+    "largestSuppliersRenegotiation": "Two largest suppliers demanding quarterly price renegotiations",
+    "marginCompression": "41% down to 37.8%",
+    "scosPilotSavings": "12.4% retrospective savings",
+    "scosRoiTimeline": "14–18 months",
+    "scosInitialCost": "€5M",
+    "scosOngoingCost": "€400k/year"
+  },
+  "stakeholderVoices": [
+    {
+      "name": "CFO",
+      "role": "Finance",
+      "stance": "cautious",
+      "quote": "Cautious about €5M risk and hidden change costs. Concerned about ROI timeline and budget impact."
+    },
+    {
+      "name": "Engineering",
+      "role": "Engineering",
+      "stance": "supportive",
+      "quote": "Supports the proposal due to competitive pressure and need for modernization."
+    },
+    {
+      "name": "Procurement Director",
+      "role": "Procurement",
+      "stance": "concerned",
+      "quote": "Fears supplier trust erosion and potential disruption to long-standing relationships."
+    },
+    {
+      "name": "HR",
+      "role": "HR",
+      "stance": "concerned",
+      "quote": "Warns of potential union strike and need for careful change management."
+    },
+    {
+      "name": "IG Metall Chapter Representative",
+      "role": "Union",
+      "stance": "opposed",
+      "quote": "We represent 14 employees whose roles could be affected. We need guarantees about job security, retraining opportunities, and transparency about how the system will be used."
+    }
+  ],
+  "externalSignals": [
+    {
+      "source": "McKern & Hall Insights (Feb 2025)",
+      "keyPoints": [
+        "GenAI in industrial supply chains is accelerating",
+        "Early adopters report 10–20% reduction in lead times and cost volatility",
+        "Firms without stakeholder integration face backlash and reputational risk"
+      ]
+    },
+    {
+      "source": "Competitor highlight: HexaBuild (Finland)",
+      "keyPoints": [
+        "Adopted AI procurement planning Q2 2024",
+        "Cut raw material volatility costs by 15%",
+        "Faced supplier turnover, grew market share by 7%",
+        "Featured for Operational Boldness"
+      ]
+    }
+  ],
+  "decisionOptions": [
+    {
+      "id": "A",
+      "title": "Full SCOS Rollout (AI-Driven Transformation)",
+      "shortLabel": "Full rollout",
+      "implications": [
+        "€5M immediate investment",
+        "Major organizational change across five departments",
+        "Uncertain stakeholder reactions",
+        "Potential for significant cost savings",
+        "Risk of supplier relationship disruption",
+        "Union concerns must be addressed"
+      ]
+    },
+    {
+      "id": "B",
+      "title": "Human-Centric Renegotiation",
+      "shortLabel": "Human-centric",
+      "implications": [
+        "No immediate investment required",
+        "Maintain existing supplier relationships",
+        "Preserve current organizational structure",
+        "Long-term competitive capability uncertainty",
+        "May fall behind competitors",
+        "Cost pressures continue"
+      ]
+    },
+    {
+      "id": "C",
+      "title": "Controlled Pilot with External Startup",
+      "shortLabel": "Controlled pilot",
+      "implications": [
+        "€1.2M pilot investment",
+        "External AI startup partnership",
+        "Learning and experimentation opportunity",
+        "Lower initial risk exposure",
+        "Uncertain scaling path",
+        "Potential for gradual adoption"
+      ]
+    }
+  ],
+  "constraints": [
+    "Initial SCOS cost €5M and €400k/year ongoing",
+    "Supplier trust and long-term partnerships are core values",
+    "Union concerns about job security and transparency",
+    "ROI expected in 14–18 months",
+    "Margins already compressed and input costs up 20%"
+  ]
+}

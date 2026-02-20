@@ -1,0 +1,82 @@
+.decision-form {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.decision-form-header {
+  margin-bottom: 1.5rem;
+}
+
+.decision-form-header h3 {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.decision-form-header p {
+  color: #666;
+}
+
+.decision-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field label {
+  font-weight: 500;
+  color: #333;
+}
+
+.field-description {
+  display: block;
+  font-weight: normal;
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.form-field input,
+.form-field select {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-field input.error,
+.form-field select.error {
+  border-color: #dc3545;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.9rem;
+}
+
+.field-cost {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.decision-form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.change-count {
+  color: #666;
+  font-size: 0.9rem;
+}

@@ -1,0 +1,107 @@
+{
+  "actId": 3,
+  "title": "The Loyalty vs. Logic Dilemma",
+  "timeContext": "Act III crisis window",
+  "firmFacts": {},
+  "operationalSignals": {
+    "priceIncreaseDemand": "PolskaStal requests 15% price increase due to energy costs",
+    "profitImpact": "Accepting full increase wipes out Q3 profit projections",
+    "supplierLeverage": "Evidence suggests PolskaStal is already in talks with HexaBuild",
+    "productionDelayRisk": "Losing PolskaStal would cause immediate production delays for flagship robotics line"
+  },
+  "stakeholderVoices": [
+    {
+      "name": "CFO Critical Warning",
+      "role": "Finance",
+      "stance": "against full increase",
+      "quote": "A 15% price increase will wipe out our Q3 profit projections. This is financially unsustainable. We must find a way to maintain the relationship without accepting the full increase."
+    },
+    {
+      "name": "Procurement Evidence",
+      "role": "Procurement",
+      "stance": "alert",
+      "quote": "Our operations team has uncovered evidence that PolskaStal is already in talks with HexaBuild. They may be using our relationship as leverage in those negotiations."
+    },
+    {
+      "name": "PolskaStal Demand",
+      "role": "Supplier",
+      "stance": "pressing",
+      "quote": "We need a 15% price increase to survive rising energy costs. We hope Terraform, as a valued partner, will support us. We have received other offers but prefer to stay with you."
+    },
+    {
+      "name": "Board Concern",
+      "role": "Board",
+      "stance": "torn",
+      "quote": "The board is concerned about the financial impact. However, they also value our relationship-first approach. This decision will define our strategic identity."
+    },
+    {
+      "name": "HexaBuild Rumor",
+      "role": "Market",
+      "stance": "competitive threat",
+      "quote": "Rumors suggest HexaBuild has made an attractive offer to PolskaStal. If we lose them, it would be a significant blow to our relationship-first strategy."
+    }
+  ],
+  "externalSignals": [
+    {
+      "source": "Market rumor",
+      "keyPoints": [
+        "HexaBuild has made an attractive offer to PolskaStal",
+        "Losing PolskaStal is a significant blow to relationship-first strategy"
+      ]
+    },
+    {
+      "source": "Email from PolskaStal CEO",
+      "keyPoints": [
+        "Subject: Contract Renegotiation Required - Disappointed with Current Terms",
+        "Body: Dear Terraform Leadership, I am writing to express my deep disappointment with the current state of our contract negotiations. We have been partners for 15 years, and during this time, we have consistently delivered quality products and maintained reliable supply chains for your flagship robotics line. However, the current contract terms no longer reflect the economic realities we face, particularly the dramatic increase in energy costs that have impacted our operations significantly. We have been patient and transparent about these challenges, but we cannot continue operating under terms that are financially unsustainable for our business. The 15% price increase we have requested is not arbitrary—it is necessary for us to maintain the quality and reliability standards that Terraform has come to expect from us over the past 15 years. I am disappointed that this request has not been met with the urgency and understanding we expected from a long-term partner. We have always valued our relationship with Terraform, but we must also ensure the viability of our own operations. We have received other offers in the market, including a very attractive proposal from HexaBuild, but we would prefer to continue our partnership with Terraform if we can reach mutually acceptable terms. Therefore, we formally request an immediate renegotiation of our contract. We need to discuss not just pricing, but also terms that reflect the true value of our partnership—reliability, quality, and the trust we have built over 15 years. I request an urgent meeting within the next week. Our relationship deserves a serious discussion about how we can move forward together. Best regards, [PolskaStal CEO]"
+      ]
+    }
+  ],
+  "decisionOptions": [
+    {
+      "id": "X",
+      "title": "Enforce the System's Logic / Hold the Line on Cost",
+      "shortLabel": "Hold the line",
+      "implications": [
+        "Affirms data-driven decision-making",
+        "Immediate alternative supplier sourcing required",
+        "Higher short-term risk and costs",
+        "Potential production delays during transition",
+        "Sets precedent for cost discipline",
+        "May damage other supplier relationships"
+      ]
+    },
+    {
+      "id": "Y",
+      "title": "Broker a Human Deal / Hybrid Solution",
+      "shortLabel": "Hybrid deal",
+      "implications": [
+        "Personal CEO intervention required",
+        "Compromise solution (8% increase or conditional reinstatement)",
+        "6-month performance review clause",
+        "Balances relationship and cost concerns",
+        "Temporary bridge solution",
+        "May set precedent for future negotiations"
+      ]
+    },
+    {
+      "id": "Z",
+      "title": "Preserve the Relationship / Revert to Tradition",
+      "shortLabel": "Preserve relationship",
+      "implications": [
+        "Full 15% price increase approved",
+        "Overrules AI system decision",
+        "Internal statement on partnership values",
+        "Personal visit to supplier",
+        "Protection from future automated cuts",
+        "Significant Q3 profit impact",
+        "Reinforces relationship-first approach"
+      ]
+    }
+  ],
+  "constraints": [
+    "Accepting full 15% increase wipes out Q3 profit projections",
+    "Evidence of supplier leverage with HexaBuild",
+    "Board is torn between financial impact and relationship-first identity"
+  ]
+}

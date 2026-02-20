@@ -1,0 +1,89 @@
+.admin-page {
+  padding: 32px;
+  background: #f7f8fb;
+  min-height: 100vh;
+}
+
+.admin-card {
+  max-width: 520px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d5d9e3;
+}
+
+.admin-error {
+  color: #b42318;
+  background: #fdecea;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.admin-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.admin-stat {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+}
+
+.admin-section {
+  margin-top: 24px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef1f6;
+  text-align: left;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-tabs button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #d5d9e3;
+  background: #fff;
+}
+
+.admin-tabs button.active {
+  background: #1f4bd8;
+  color: #fff;
+  border-color: #1f4bd8;
+}

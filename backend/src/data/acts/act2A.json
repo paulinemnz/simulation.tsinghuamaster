@@ -1,0 +1,94 @@
+{
+  "actId": 2,
+  "title": "ACT II — Between Resistance and Momentum",
+  "timeContext": "Q2 2025 (3 weeks post-decision)",
+  "firmFacts": {},
+  "operationalSignals": {
+    "processTimeReduction": "18% reduction in procurement process time",
+    "dataQualityIssues": "Data quality issues persist in some categories",
+    "aiAnxietyIncrease": "+14% rise in AI anxiety among procurement teams",
+    "supplierTransparencyConcerns": "Suppliers expressing discomfort with AI-driven negotiations",
+    "pressInquiry": "Handelsblatt inquiry about AI-induced layoffs"
+  },
+  "stakeholderVoices": [
+    {
+      "name": "Procurement Team",
+      "role": "Procurement",
+      "stance": "anxious",
+      "quote": "Internal HR reports +14% rise in \"AI anxiety\" among procurement teams. Several team members have requested transfers to other departments."
+    },
+    {
+      "name": "Supplier Relations Update",
+      "role": "Suppliers",
+      "stance": "concerned",
+      "quote": "Supplier concerns about transparency and algorithmic bias are growing. Some key suppliers are expressing discomfort with the AI-driven negotiation process."
+    },
+    {
+      "name": "HR & Union Update",
+      "role": "HR/Union",
+      "stance": "concerned",
+      "quote": "HR flags increased tension. Union representatives are requesting more frequent consultations about job security and training opportunities."
+    },
+    {
+      "name": "Board & Investor Pressure",
+      "role": "Board",
+      "stance": "demanding",
+      "quote": "Board expects confident Q2 investor update. They want to see clear progress metrics and stakeholder alignment before the next quarterly meeting."
+    },
+    {
+      "name": "Press Inquiry",
+      "role": "Media",
+      "stance": "scrutinizing",
+      "quote": "Handelsblatt has submitted an inquiry about AI-induced layoffs and the impact on Terraform's workforce. PR team needs guidance on response strategy."
+    }
+  ],
+  "externalSignals": [],
+  "decisionOptions": [
+    {
+      "id": "A1",
+      "title": "Accelerate Rollout Across All Five Departments",
+      "shortLabel": "Accelerate rollout",
+      "implications": [
+        "Full deployment by Q3",
+        "Press briefing required",
+        "3-week training rotation",
+        "Faster time to value",
+        "Higher risk of resistance",
+        "Board visibility increases"
+      ]
+    },
+    {
+      "id": "A2",
+      "title": "Launch AI Change Management Task Force",
+      "shortLabel": "Pause for alignment",
+      "implications": [
+        "Temporary pause on expansion",
+        "Cross-functional collaboration",
+        "Stakeholder engagement",
+        "Extended timeline (~2 months)",
+        "Better alignment",
+        "Slower progress"
+      ]
+    },
+    {
+      "id": "A3",
+      "title": "Strategic Reset: Pivot to Targeted AI Procurement",
+      "shortLabel": "Targeted AI",
+      "implications": [
+        "Targeted deployment",
+        "Manual oversight for key suppliers",
+        "AI as assistive tool",
+        "Lower risk approach",
+        "Preserves relationships",
+        "Limited efficiency gains"
+      ]
+    }
+  ],
+  "constraints": [
+    "Board expects confident Q2 investor update",
+    "Supplier transparency concerns are rising",
+    "Data quality issues persist",
+    "AI anxiety among procurement teams",
+    "Press inquiry about AI-induced layoffs"
+  ]
+}

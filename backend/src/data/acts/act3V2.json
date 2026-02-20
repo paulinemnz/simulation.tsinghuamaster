@@ -1,0 +1,108 @@
+{
+  "actId": 3,
+  "title": "The Loyalty vs. Logic Dilemma",
+  "timeContext": "Act III crisis window",
+  "firmFacts": {},
+  "operationalSignals": {
+    "costVolatilityRisk": "PolskaStal flagged as cost volatility risk",
+    "relationshipStrain": "PolskaStal feels reduced to a data point and offended",
+    "leadTimeRisk": "Alternative sourcing would take 10–14 weeks minimum",
+    "productionDelayRisk": "Losing PolskaStal would cause immediate production delays for flagship robotics line"
+  },
+  "stakeholderVoices": [
+    {
+      "name": "CFO Assessment",
+      "role": "Finance",
+      "stance": "balanced",
+      "quote": "The cost volatility risk assessment is valid, but we need to consider the relationship value. A moderate price increase might be acceptable if it maintains supply continuity."
+    },
+    {
+      "name": "Procurement Concern",
+      "role": "Procurement",
+      "stance": "cautious",
+      "quote": "PolskaStal is aware of the risk assessment and feels offended. They perceive this as reducing their value to a data point. Alternative sourcing would take 10-14 weeks minimum."
+    },
+    {
+      "name": "PolskaStal Response",
+      "role": "Supplier",
+      "stance": "offended",
+      "quote": "We understand your system flagged us as a risk, but we have been reliable partners for years. This feels like a betrayal. We are considering an offer from HexaBuild."
+    },
+    {
+      "name": "Board Guidance",
+      "role": "Board",
+      "stance": "balanced",
+      "quote": "The board wants a balanced solution that preserves relationships while maintaining cost discipline. This is a test of our hybrid approach."
+    },
+    {
+      "name": "Market Intelligence",
+      "role": "Market",
+      "stance": "competitive threat",
+      "quote": "HexaBuild is actively courting PolskaStal. If we lose this supplier, it could signal weakness in our balanced strategy to the market."
+    }
+  ],
+  "externalSignals": [
+    {
+      "source": "Market intelligence",
+      "keyPoints": [
+        "HexaBuild is actively courting PolskaStal",
+        "Losing PolskaStal could signal weakness in the balanced strategy"
+      ]
+    },
+    {
+      "source": "Email from PolskaStal CEO",
+      "keyPoints": [
+        "Subject: Deep Disappointment - Request for Contract Renegotiation",
+        "Body: Dear Terraform Management, I am writing to express my profound disappointment regarding how our partnership has been evaluated by your system. We have learned that PolskaStal has been flagged as a 'cost volatility risk' by your AI assessment tools. This characterization deeply offends us, as it reduces 15 years of reliable partnership, quality delivery, and mutual trust to a mere data point. We have always been transparent about market conditions affecting our pricing, including energy costs and raw material fluctuations. We have never hidden these challenges from you, and we have always worked collaboratively to find solutions that benefit both parties. To be reduced to a risk assessment without any human discussion or understanding of our circumstances is not how we expected a valued partner to treat us. Given this situation, we formally request an immediate renegotiation of our contract terms. We believe our partnership deserves a fair reassessment that takes into account not just cost metrics, but also the value of reliability, quality, and long-term relationship stability. We are open to discussing terms that reflect both our needs and yours, but we cannot continue under the current framework where we feel reduced to algorithmic inputs. We have received interest from other parties, including HexaBuild, but we would prefer to resolve this with Terraform if we can find a mutually acceptable path forward. I request an urgent meeting to discuss contract renegotiation. This relationship deserves a human conversation, not just data-driven decisions. Best regards, [PolskaStal CEO]"
+      ]
+    }
+  ],
+  "decisionOptions": [
+    {
+      "id": "X",
+      "title": "Enforce the System's Logic / Hold the Line on Cost",
+      "shortLabel": "Hold the line",
+      "implications": [
+        "Affirms data-driven decision-making",
+        "Immediate alternative supplier sourcing required",
+        "Higher short-term risk and costs",
+        "Potential production delays during transition",
+        "Sets precedent for cost discipline",
+        "May damage other supplier relationships"
+      ]
+    },
+    {
+      "id": "Y",
+      "title": "Broker a Human Deal / Hybrid Solution",
+      "shortLabel": "Hybrid deal",
+      "implications": [
+        "Personal CEO intervention required",
+        "Compromise solution (8% increase or conditional reinstatement)",
+        "6-month performance review clause",
+        "Balances relationship and cost concerns",
+        "Temporary bridge solution",
+        "May set precedent for future negotiations"
+      ]
+    },
+    {
+      "id": "Z",
+      "title": "Preserve the Relationship / Revert to Tradition",
+      "shortLabel": "Preserve relationship",
+      "implications": [
+        "Full 15% price increase approved",
+        "Overrules AI system decision",
+        "Internal statement on partnership values",
+        "Personal visit to supplier",
+        "Protection from future automated cuts",
+        "Significant Q3 profit impact",
+        "Reinforces relationship-first approach"
+      ]
+    }
+  ],
+  "constraints": [
+    "Alternative sourcing would take 10–14 weeks",
+    "Board wants a balanced solution",
+    "HexaBuild courting PolskaStal",
+    "Decision sets precedent for hybrid strategy credibility"
+  ]
+}

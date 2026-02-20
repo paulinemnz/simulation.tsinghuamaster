@@ -1,0 +1,104 @@
+{
+  "actId": 4,
+  "title": "Defining Terraform's Path Forward",
+  "timeContext": "Post-crisis strategic reset",
+  "firmFacts": {
+    "revenue": "€448M (+6.7%)",
+    "grossMargin": "38.1%",
+    "inventoryHoldingDays": 74,
+    "supplierChurn": "Low; negotiations slower but constructive",
+    "internalTrustIndex": "Improving unevenly across units"
+  },
+  "operationalSignals": {
+    "stabilitySignal": "Operational stability maintained",
+    "strategyTension": "Strategic identity contested internally",
+    "marketNarrative": "Market wants a sharper narrative"
+  },
+  "stakeholderVoices": [
+    {
+      "name": "Board Chair",
+      "role": "Board",
+      "stance": "seek clarity",
+      "quote": "We avoided disruption. Now we need a clearer direction."
+    },
+    {
+      "name": "CFO",
+      "role": "Finance",
+      "stance": "coherence",
+      "quote": "We can fund a strategy—but not multiple strategies at once."
+    },
+    {
+      "name": "Head of Engineering",
+      "role": "Engineering",
+      "stance": "accelerate",
+      "quote": "Competitors are accelerating faster than incremental change."
+    },
+    {
+      "name": "Procurement Director",
+      "role": "Procurement",
+      "stance": "clarity",
+      "quote": "Suppliers remain engaged but want clarity on our future model."
+    },
+    {
+      "name": "Investor Relations",
+      "role": "Investors",
+      "stance": "narrative",
+      "quote": "The market wants a sharper narrative."
+    }
+  ],
+  "externalSignals": [
+    {
+      "source": "SmartIndustry Weekly (Analyst Note)",
+      "keyPoints": [
+        "Terraform stands at a strategic inflection point",
+        "Next move defines disciplined niche vs platform vs innovation challenger"
+      ]
+    }
+  ],
+  "decisionOptions": [
+    {
+      "id": "Innovation",
+      "title": "OPTION 1 — Innovation-Oriented Transformation",
+      "shortLabel": "Innovation",
+      "implications": [
+        "Significant investment in AI, robotics R&D, and analytics",
+        "Major reskilling and talent development",
+        "Longer payback horizons and execution risk",
+        "Potential for strong differentiation if successful",
+        "High upside with high demand on leadership",
+        "Requires strong learning capacity"
+      ]
+    },
+    {
+      "id": "Ecosystem",
+      "title": "OPTION 2 — Ecosystem-Oriented Integration",
+      "shortLabel": "Ecosystem",
+      "implications": [
+        "Deep partnerships with suppliers and AI vendors",
+        "Shared standards and co-investment",
+        "Reduced internal complexity",
+        "Strategic dependence on partner alignment",
+        "Adaptive and scalable approach",
+        "Governance-intensive model"
+      ]
+    },
+    {
+      "id": "Efficiency",
+      "title": "OPTION 3 — Efficiency-Driven Consolidation",
+      "shortLabel": "Efficiency",
+      "implications": [
+        "Tight cost controls and selective automation",
+        "Exit from non-core activities",
+        "Predictable cash flows",
+        "Incremental innovation focused on efficiency",
+        "Stable and defensible position",
+        "Limits long-term optionality"
+      ]
+    }
+  ],
+  "constraints": [
+    "Board wants clearer direction, not multiple strategies",
+    "Suppliers want clarity on future model",
+    "Competitors accelerating faster than incremental change"
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "actId": 2,
+  "title": "Testing the Waters — Terraform's AI Pilot in Action",
+  "timeContext": "Q2 2025 (8 weeks into pilot)",
+  "firmFacts": {},
+  "operationalSignals": {
+    "efficiencyImprovement": "+5.4% procurement efficiency improvement",
+    "pilotUsability": "High usability scores from pilot team",
+    "supplierEngagement": "Low supplier response engagement",
+    "dataIntegrationChallenges": "Data integration challenges identified",
+    "organizationalConfusion": "Non-pilot teams feel excluded"
+  },
+  "stakeholderVoices": [
+    {
+      "name": "Pilot Team Feedback",
+      "role": "Pilot Team",
+      "stance": "optimistic",
+      "quote": "Pilot team reports high usability and +5.4% procurement efficiency improvement in 8 weeks. Team is optimistic about scaling the approach."
+    },
+    {
+      "name": "Non-Pilot Team Concerns",
+      "role": "HR",
+      "stance": "concerned",
+      "quote": "HR flags confusion across non-pilot teams. Some departments feel left out and question why they weren't included in the pilot."
+    },
+    {
+      "name": "CFO Assessment",
+      "role": "Finance",
+      "stance": "interested",
+      "quote": "CFO impressed with preliminary results. Notes the efficiency gains and sees potential for broader application. Requests detailed ROI analysis."
+    },
+    {
+      "name": "HR & Organizational Impact",
+      "role": "HR",
+      "stance": "mixed",
+      "quote": "HR reports mixed signals. Some teams are eager to join the pilot, others are concerned about job security and training needs."
+    },
+    {
+      "name": "Board Request",
+      "role": "Board",
+      "stance": "pressing",
+      "quote": "Board wants clarity by next quarter. They need a clear decision on whether to expand, stop, or pivot to a full transformation roadmap."
+    },
+    {
+      "name": "Supplier Engagement",
+      "role": "Suppliers",
+      "stance": "hesitant",
+      "quote": "Low supplier response engagement in pilot. Some suppliers are hesitant to fully engage with the AI system, preferring traditional communication."
+    }
+  ],
+  "externalSignals": [],
+  "decisionOptions": [
+    {
+      "id": "C1",
+      "title": "Expand Pilot to a Second Business Unit",
+      "shortLabel": "Expand pilot",
+      "implications": [
+        "€750k additional investment",
+        "Second department added",
+        "Team rotation program",
+        "More learning opportunities",
+        "Increased complexity",
+        "Extended timeline"
+      ]
+    },
+    {
+      "id": "C2",
+      "title": "Pause Pilot and Revert to Traditional Strategy",
+      "shortLabel": "Pause and revert",
+      "implications": [
+        "Pilot termination",
+        "Internal documentation",
+        "Return to traditional approach",
+        "Preserves relationships",
+        "No AI adoption",
+        "Competitive gap remains"
+      ]
+    },
+    {
+      "id": "C3",
+      "title": "Announce Strategic Pivot Toward Platformization",
+      "shortLabel": "Full roadmap",
+      "implications": [
+        "Full transformation roadmap",
+        "Chief Digital Officer role",
+        "Cross-functional task force",
+        "Vendor negotiations",
+        "Q4 timeline",
+        "Major organizational change"
+      ]
+    }
+  ],
+  "constraints": [
+    "Board wants clarity by next quarter",
+    "Data integration challenges persist",
+    "Low supplier response engagement",
+    "Mixed organizational sentiment outside the pilot"
+  ]
+}
