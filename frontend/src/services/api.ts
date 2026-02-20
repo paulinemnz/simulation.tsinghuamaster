@@ -47,14 +47,27 @@ api.interceptors.response.use(
     fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:error',message:'API error intercepted',data:{errorMessage:error.message,errorCode:error.code,hasResponse:!!error.response,responseStatus:error.response?.status,requestURL:error.config?.url,baseURL:error.config?.baseURL},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
     // #endregion
     
+    // Handle 502 Bad Gateway errors (nginx can't reach backend)
+    if (error.response?.status === 502) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:error',message:'502 Bad Gateway error',data:{requestURL:error.config?.url,baseURL:error.config?.baseURL,fullURL:`${error.config?.baseURL}${error.config?.url}`},timestamp:Date.now(),runId:'502-debug',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      error.networkError = 'Error 502: Bad Gateway - nginx cannot reach the backend server. Please check that the backend service is running and BACKEND_URL is configured correctly.';
+    }
+    
     // Handle network errors (no response from server)
     if (!error.response) {
       if (error.code === 'ECONNABORTED') {
         error.networkError = 'Request timeout - the server took too long to respond. Please check if the backend server is running.';
       } else if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
-        const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-        const backendUrl = apiBaseUrl.replace(/\/api\/?$/, '');
-        error.networkError = `Network error - unable to connect to the server. Please ensure the backend server is running on ${backendUrl}`;
+        // In production, don't show absolute URLs in error messages
+        if (process.env.NODE_ENV === 'production') {
+          error.networkError = 'Network error - unable to connect to the server. Please check backend configuration.';
+        } else {
+          const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+          const backendUrl = apiBaseUrl.replace(/\/api\/?$/, '');
+          error.networkError = `Network error - unable to connect to the server. Please ensure the backend server is running on ${backendUrl}`;
+        }
       } else {
         error.networkError = `Connection error: ${error.message}. Please ensure the backend server is running.`;
       }

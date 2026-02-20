@@ -83,10 +83,21 @@ const LandingPage: React.FC = () => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000); // Quick 3s timeout
         
-        // Use the configured API URL instead of hardcoded localhost
-        const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-        // Remove /api suffix if present, then add /health
-        const healthUrl = apiBaseUrl.replace(/\/api\/?$/, '') + '/health';
+        // In production, use relative path so nginx can proxy it
+        // In development, use absolute URL
+        let healthUrl: string;
+        if (process.env.NODE_ENV === 'production' || !process.env.REACT_APP_API_URL) {
+          // Production: use relative path (will be proxied by nginx)
+          healthUrl = '/health';
+        } else {
+          // Development: use absolute URL
+          const apiBaseUrl = process.env.REACT_APP_API_URL;
+          healthUrl = apiBaseUrl.replace(/\/api\/?$/, '') + '/health';
+        }
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:checkBackendHealth',message:'Health check URL determined',data:{healthUrl,nodeEnv:process.env.NODE_ENV,reactAppApiUrl:process.env.REACT_APP_API_URL},timestamp:Date.now(),runId:'502-debug',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         
         const response = await fetch(healthUrl, {
           method: 'GET',
@@ -94,6 +105,10 @@ const LandingPage: React.FC = () => {
         });
         
         clearTimeout(timeoutId);
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:checkBackendHealth',message:'Health check response received',data:{status:response.status,statusText:response.statusText,ok:response.ok,url:response.url},timestamp:Date.now(),runId:'502-debug',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         
         if (response.ok) {
           const responseBody = await response.json().catch(() => ({}));
@@ -110,6 +125,9 @@ const LandingPage: React.FC = () => {
           setShowBackendWarning(true);
         }
       } catch (err: any) {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:checkBackendHealth',message:'Health check error',data:{errorMessage:err?.message,errorName:err?.name,errorStack:err?.stack},timestamp:Date.now(),runId:'502-debug',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         // Silently handle errors - don't show error messages
         // Just mark backend as offline
         setBackendStatus('offline');
@@ -507,7 +525,7 @@ const LandingPage: React.FC = () => {
               color: '#856404',
               marginTop: '16px'
             }}>
-              <strong>Warning:</strong> Backend server appears to be offline. Please ensure the backend is running on {process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:3001'}
+              <strong>Warning:</strong> Backend server appears to be offline. {process.env.NODE_ENV === 'production' ? 'Please check backend configuration and ensure the backend service is running.' : `Please ensure the backend is running on ${process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:3001'}`}
             </div>
           )}
 

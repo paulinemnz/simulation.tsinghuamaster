@@ -41,7 +41,7 @@ RUN mkdir -p /etc/nginx/templates && \
     \
     # Proxy API requests to backend \
     location /api { \
-        proxy_pass $BACKEND_URL; \
+        proxy_pass $BACKEND_URL/api; \
         proxy_http_version 1.1; \
         proxy_set_header Upgrade $http_upgrade; \
         proxy_set_header Connection "upgrade"; \
