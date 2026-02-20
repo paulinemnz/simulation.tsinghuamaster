@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+// Use relative path in production (will be proxied by nginx), absolute URL in development
+const API_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3001/api');
 
 console.log('[DEBUG] API service initialized:', { 
   apiURL: API_URL, 

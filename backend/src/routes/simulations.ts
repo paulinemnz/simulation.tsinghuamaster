@@ -44,6 +44,7 @@ router.post(
     }) + '\n';
     fs.appendFileSync(logPath, logEntry, 'utf8');
     // #endregion
+    console.log('Start-with-mode request body:', req.body);
     console.log('[API] POST /start-with-mode - Request received', {
       participant_id: req.body.participant_id,
       mode: req.body.mode

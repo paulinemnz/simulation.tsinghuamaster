@@ -150,6 +150,9 @@ app.use('/api/simulations', (req, res, next) => {
 });
 // #endregion
 app.use('/api/simulations', simulationsRouter);
+// Also mount at /simulations (without /api) for direct frontend access
+// This handles requests like POST /simulations/start-with-mode
+app.use('/simulations', simulationsRouter);
 app.use('/api/sim', actsRouter);
 app.use('/api/sim', simulationStateRouter);
 app.use('/api/ai', aiRouter);
