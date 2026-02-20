@@ -41,7 +41,7 @@ RUN mkdir -p /etc/nginx/templates && \
     \
     # Proxy API requests to backend \
     location /api { \
-        proxy_pass ${BACKEND_URL}; \
+        proxy_pass $BACKEND_URL; \
         proxy_http_version 1.1; \
         proxy_set_header Upgrade $http_upgrade; \
         proxy_set_header Connection "upgrade"; \
@@ -56,7 +56,7 @@ RUN mkdir -p /etc/nginx/templates && \
     \
     # Proxy simulations routes directly (for compatibility with existing frontend code) \
     location /simulations { \
-        proxy_pass ${BACKEND_URL}/api/simulations; \
+        proxy_pass $BACKEND_URL/api/simulations; \
         proxy_http_version 1.1; \
         proxy_set_header Upgrade $http_upgrade; \
         proxy_set_header Connection "upgrade"; \
@@ -71,7 +71,7 @@ RUN mkdir -p /etc/nginx/templates && \
     \
     # Health check endpoint (also proxy to backend) \
     location /health { \
-        proxy_pass ${BACKEND_URL}/health; \
+        proxy_pass $BACKEND_URL/health; \
         proxy_http_version 1.1; \
         proxy_set_header Host $host; \
         proxy_set_header X-Real-IP $remote_addr; \
@@ -94,10 +94,47 @@ RUN mkdir -p /etc/nginx/templates && \
 # Set default backend URL (should be overridden in Railway with backend service URL)
 # Format: https://your-backend-service-name.up.railway.app
 # Do NOT include /api in the URL - nginx will add it
-ENV BACKEND_URL=http://localhost:8080
+ENV BACKEND_URL=""
 
 # Expose port
 EXPOSE 80
 
-# Use envsubst to substitute environment variables in nginx config at runtime
-CMD ["/bin/sh", "-c", "envsubst '$$BACKEND_URL' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]
+# Create startup script that validates BACKEND_URL and generates nginx config
+RUN echo '#!/bin/sh' > /start-nginx.sh && \
+    echo 'set -e' >> /start-nginx.sh && \
+    echo '' >> /start-nginx.sh && \
+    echo '# Debug: Print all environment variables starting with BACKEND' >> /start-nginx.sh && \
+    echo 'echo "=== Environment Debug ==="' >> /start-nginx.sh && \
+    echo 'env | grep -i backend || echo "No BACKEND variables found"' >> /start-nginx.sh && \
+    echo '' >> /start-nginx.sh && \
+    echo '# Export BACKEND_URL to ensure it is available' >> /start-nginx.sh && \
+    echo 'export BACKEND_URL="${BACKEND_URL:-}"' >> /start-nginx.sh && \
+    echo '' >> /start-nginx.sh && \
+    echo '# Validate BACKEND_URL' >> /start-nginx.sh && \
+    echo 'if [ -z "$BACKEND_URL" ] || [ "$BACKEND_URL" = "" ]; then' >> /start-nginx.sh && \
+    echo '  echo "ERROR: BACKEND_URL environment variable is not set!"' >> /start-nginx.sh && \
+    echo '  echo "Please set BACKEND_URL in Railway environment variables to your backend service URL"' >> /start-nginx.sh && \
+    echo '  echo "Example: https://your-backend-service.up.railway.app"' >> /start-nginx.sh && \
+    echo '  exit 1' >> /start-nginx.sh && \
+    echo 'fi' >> /start-nginx.sh && \
+    echo '' >> /start-nginx.sh && \
+    echo 'echo "Using BACKEND_URL: $BACKEND_URL"' >> /start-nginx.sh && \
+    echo '' >> /start-nginx.sh && \
+    echo '# Generate nginx config with substituted BACKEND_URL' >> /start-nginx.sh && \
+    echo '# envsubst replaces $VARIABLE or ${VARIABLE} in the template' >> /start-nginx.sh && \
+    echo 'envsubst '"'"'$BACKEND_URL'"'"' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf' >> /start-nginx.sh && \
+    echo '' >> /start-nginx.sh && \
+    echo '# Debug: Show first few lines of generated config' >> /start-nginx.sh && \
+    echo 'echo "=== Generated nginx config (first 10 lines) ==="' >> /start-nginx.sh && \
+    echo 'head -n 10 /etc/nginx/conf.d/default.conf' >> /start-nginx.sh && \
+    echo '' >> /start-nginx.sh && \
+    echo '# Validate generated config' >> /start-nginx.sh && \
+    echo 'echo "=== Validating nginx config ==="' >> /start-nginx.sh && \
+    echo 'nginx -t' >> /start-nginx.sh && \
+    echo '' >> /start-nginx.sh && \
+    echo '# Start nginx' >> /start-nginx.sh && \
+    echo 'echo "=== Starting nginx ==="' >> /start-nginx.sh && \
+    echo 'exec nginx -g "daemon off;"' >> /start-nginx.sh && \
+    chmod +x /start-nginx.sh
+
+CMD ["/start-nginx.sh"]
