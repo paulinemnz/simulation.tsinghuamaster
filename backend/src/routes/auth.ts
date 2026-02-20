@@ -1,6 +1,7 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import type { StringValue } from 'ms';
 import { User } from '../models/User';
 import { authenticateToken } from '../middleware/auth';
 
@@ -127,8 +128,11 @@ router.get(
 
 function generateToken(userId: string): string {
   const secret = process.env.JWT_SECRET || 'your-secret-key';
-  const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
-  return jwt.sign({ id: userId }, secret, { expiresIn });
+  // expiresIn must be StringValue (from ms package) or number
+  // '7d' is a valid StringValue format (e.g., "7d", "1h", "30m")
+  const expiresIn: StringValue | number = (process.env.JWT_EXPIRES_IN || '7d') as StringValue;
+  const options: SignOptions = { expiresIn };
+  return jwt.sign({ id: userId }, secret, options);
 }
 
 export default router;

@@ -27,7 +27,7 @@ try {
 import { rebuildStateFromEvents, SimulationEvent } from '../../../shared/types/simulation.types';
 // #region agent log
 try { 
-  fs.appendFileSync(logPath, JSON.stringify({location:'simulationState.ts:25',message:'AFTER importing simulation.types - import completed',data:{hypothesisId:'MODULE_RESOLUTION',hasRebuildStateFromEvents:typeof rebuildStateFromEvents !== 'undefined',hasSimulationEvent:typeof SimulationEvent !== 'undefined',rebuildStateType:typeof rebuildStateFromEvents,simulationEventType:typeof SimulationEvent},timestamp:Date.now()})+'\n'); 
+  fs.appendFileSync(logPath, JSON.stringify({location:'simulationState.ts:25',message:'AFTER importing simulation.types - import completed',data:{hypothesisId:'MODULE_RESOLUTION',hasRebuildStateFromEvents:typeof rebuildStateFromEvents !== 'undefined'},timestamp:Date.now()})+'\n'); 
 } catch(e) {
   console.error('Log write error:', e);
 }
