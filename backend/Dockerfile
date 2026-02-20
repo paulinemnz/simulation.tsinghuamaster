@@ -18,8 +18,11 @@ RUN npm install
 # Copy source code
 COPY backend/src/ ./src/
 
+# Create symlink so ../../shared/ paths work from src/models/ and src/services/
+RUN ln -s ../shared ./shared
+
 # Update tsconfig.json to include shared directory and remove rootDir restriction
-RUN node -e "const fs=require('fs'); const ts=JSON.parse(fs.readFileSync('tsconfig.json')); delete ts.compilerOptions.rootDir; if (!ts.include) ts.include=[]; if (!ts.include.includes('src/**/*')) ts.include.push('src/**/*'); if (!ts.include.includes('../shared/**/*')) ts.include.push('../shared/**/*'); fs.writeFileSync('tsconfig.json',JSON.stringify(ts,null,2));"
+RUN node -e "const fs=require('fs'); const ts=JSON.parse(fs.readFileSync('tsconfig.json')); delete ts.compilerOptions.rootDir; if (!ts.include) ts.include=[]; if (!ts.include.includes('src/**/*')) ts.include.push('src/**/*'); if (!ts.include.includes('shared/**/*')) ts.include.push('shared/**/*'); fs.writeFileSync('tsconfig.json',JSON.stringify(ts,null,2));"
 
 # Build TypeScript (from backend directory)
 RUN npm run build
