@@ -120,13 +120,26 @@ RUN echo '#!/bin/sh' > /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
     echo 'echo "Using BACKEND_URL: $BACKEND_URL"' >> /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
+    echo '# Normalize BACKEND_URL: ensure it has a protocol prefix' >> /start-nginx.sh && \
+    echo 'ORIGINAL_BACKEND_URL="$BACKEND_URL"' >> /start-nginx.sh && \
+    echo 'if echo "$BACKEND_URL" | grep -qE "^https?://"; then' >> /start-nginx.sh && \
+    echo '  echo "BACKEND_URL already has protocol prefix: $BACKEND_URL"' >> /start-nginx.sh && \
+    echo 'else' >> /start-nginx.sh && \
+    echo '  echo "Adding https:// prefix to BACKEND_URL (original: $BACKEND_URL)"' >> /start-nginx.sh && \
+    echo '  export BACKEND_URL="https://$BACKEND_URL"' >> /start-nginx.sh && \
+    echo '  echo "Normalized BACKEND_URL: $BACKEND_URL"' >> /start-nginx.sh && \
+    echo 'fi' >> /start-nginx.sh && \
+    echo 'echo "Final BACKEND_URL for nginx config: $BACKEND_URL"' >> /start-nginx.sh && \
+    echo '' >> /start-nginx.sh && \
     echo '# Generate nginx config with substituted BACKEND_URL' >> /start-nginx.sh && \
     echo '# envsubst replaces $VARIABLE or ${VARIABLE} in the template' >> /start-nginx.sh && \
     echo 'envsubst '"'"'$BACKEND_URL'"'"' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf' >> /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
-    echo '# Debug: Show first few lines of generated config' >> /start-nginx.sh && \
-    echo 'echo "=== Generated nginx config (first 10 lines) ==="' >> /start-nginx.sh && \
-    echo 'head -n 10 /etc/nginx/conf.d/default.conf' >> /start-nginx.sh && \
+    echo '# Debug: Show generated config (showing proxy_pass lines)' >> /start-nginx.sh && \
+    echo 'echo "=== Generated nginx config (proxy_pass directives) ==="' >> /start-nginx.sh && \
+    echo 'grep -n "proxy_pass" /etc/nginx/conf.d/default.conf || echo "No proxy_pass found"' >> /start-nginx.sh && \
+    echo 'echo "=== Full generated nginx config ==="' >> /start-nginx.sh && \
+    echo 'cat /etc/nginx/conf.d/default.conf' >> /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
     echo '# Validate generated config' >> /start-nginx.sh && \
     echo 'echo "=== Validating nginx config ==="' >> /start-nginx.sh && \
