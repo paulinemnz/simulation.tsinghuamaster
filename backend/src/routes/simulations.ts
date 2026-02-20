@@ -30,6 +30,20 @@ router.post(
     body('mode').isIn(['C0', 'C1', 'C2']).withMessage('Mode must be C0, C1, or C2'),
   ],
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // #region agent log
+    const fs = require('fs');
+    const logPath = 'c:\\Pauline\\qinghua\\year three\\thesis\\mid thesis defense\\Cursor 2\\.cursor\\debug.log';
+    const logEntry = JSON.stringify({
+      id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: Date.now(),
+      location: 'simulations.ts:32',
+      message: 'POST /start-with-mode handler invoked',
+      data: { method: req.method, path: req.path, body: req.body, headers: req.headers },
+      runId: 'debug-405',
+      hypothesisId: 'B'
+    }) + '\n';
+    fs.appendFileSync(logPath, logEntry, 'utf8');
+    // #endregion
     console.log('[API] POST /start-with-mode - Request received', {
       participant_id: req.body.participant_id,
       mode: req.body.mode

@@ -194,6 +194,12 @@ const LandingPage: React.FC = () => {
     try {
       console.log('[LandingPage] Starting simulation:', { email: email.trim(), mode: selectedMode });
       
+      // #region agent log
+      const apiBaseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+      const fullURL = `${apiBaseURL}/simulations/start-with-mode`;
+      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:198',message:'About to make POST request to start-with-mode',data:{apiBaseURL,fullURL,endpoint:'/simulations/start-with-mode',requestBody:{participant_id:email.trim(),mode:selectedMode}},timestamp:Date.now(),runId:'debug-405',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      
       // Start simulation with the selected mode
       const response = await api.post('/simulations/start-with-mode', {
         participant_id: email.trim(),
@@ -285,6 +291,9 @@ const LandingPage: React.FC = () => {
         networkError: err?.networkError,
         code: err?.code
       });
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:279',message:'Error caught in startSimulation',data:{errorMessage:err?.message,responseStatus:err?.response?.status,responseData:err?.response?.data,requestURL:err?.config?.url,requestMethod:err?.config?.method,baseURL:err?.config?.baseURL,fullRequestURL:`${err?.config?.baseURL}${err?.config?.url}`},timestamp:Date.now(),runId:'debug-405',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
       
       // Extract error message - ALWAYS show error to user
       let errorMessage = 'Unable to start simulation.';

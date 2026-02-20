@@ -24,8 +24,29 @@ app.use(generalRateLimiter.middleware());
 const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
 app.use(cors({
   origin: corsOrigin,
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+// #region agent log
+app.use((req, res, next) => {
+  if (req.path.includes('start-with-mode') || req.originalUrl.includes('start-with-mode')) {
+    const fs = require('fs');
+    const logPath = 'c:\\Pauline\\qinghua\\year three\\thesis\\mid thesis defense\\Cursor 2\\.cursor\\debug.log';
+    const logEntry = JSON.stringify({
+      id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: Date.now(),
+      location: 'server.ts:28',
+      message: 'CORS middleware - start-with-mode request',
+      data: { method: req.method, path: req.path, originalUrl: req.originalUrl, origin: req.headers.origin },
+      runId: 'debug-405',
+      hypothesisId: 'C'
+    }) + '\n';
+    fs.appendFileSync(logPath, logEntry, 'utf8');
+  }
+  next();
+});
+// #endregion
 app.use(morgan('dev'));
 
 try {
@@ -44,6 +65,22 @@ try {
 
 // Request timeout middleware (30 seconds default)
 app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+  // #region agent log
+  if (req.path.includes('start-with-mode') || req.originalUrl.includes('start-with-mode')) {
+    const fs = require('fs');
+    const logPath = 'c:\\Pauline\\qinghua\\year three\\thesis\\mid thesis defense\\Cursor 2\\.cursor\\debug.log';
+    const logEntry = JSON.stringify({
+      id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: Date.now(),
+      location: 'server.ts:46',
+      message: 'Request middleware - start-with-mode detected',
+      data: { method: req.method, path: req.path, originalUrl: req.originalUrl, url: req.url },
+      runId: 'debug-405',
+      hypothesisId: 'C'
+    }) + '\n';
+    fs.appendFileSync(logPath, logEntry, 'utf8');
+  }
+  // #endregion
   const timeout = 30000; // 30 seconds
   req.setTimeout(timeout, () => {
     if (!res.headersSent) {
@@ -95,12 +132,50 @@ app.use('/api/scenarios', scenariosRouter);
 app.use('/api/participants', participantsRouter);
 app.use('/api/decisions', decisionsRouter);
 app.use('/api/analytics', analyticsRouter);
+// #region agent log
+app.use('/api/simulations', (req, res, next) => {
+  const fs = require('fs');
+  const logPath = 'c:\\Pauline\\qinghua\\year three\\thesis\\mid thesis defense\\Cursor 2\\.cursor\\debug.log';
+  const logEntry = JSON.stringify({
+    id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    timestamp: Date.now(),
+    location: 'server.ts:98',
+    message: 'Request to /api/simulations router',
+    data: { method: req.method, path: req.path, originalUrl: req.originalUrl, url: req.url },
+    runId: 'debug-405',
+    hypothesisId: 'A'
+  }) + '\n';
+  fs.appendFileSync(logPath, logEntry, 'utf8');
+  next();
+});
+// #endregion
 app.use('/api/simulations', simulationsRouter);
 app.use('/api/sim', actsRouter);
 app.use('/api/sim', simulationStateRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/copilot', copilotRouter);
 app.use('/api/admin', adminRouter);
+
+// Debug: Log all unmatched requests before 404 handler
+// #region agent log
+app.use((req, res, next) => {
+  if (req.path.includes('start-with-mode') || req.originalUrl.includes('start-with-mode')) {
+    const fs = require('fs');
+    const logPath = 'c:\\Pauline\\qinghua\\year three\\thesis\\mid thesis defense\\Cursor 2\\.cursor\\debug.log';
+    const logEntry = JSON.stringify({
+      id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: Date.now(),
+      location: 'server.ts:106',
+      message: 'Unmatched request reached error handler',
+      data: { method: req.method, path: req.path, originalUrl: req.originalUrl, url: req.url, routeMatched: false },
+      runId: 'debug-405',
+      hypothesisId: 'A'
+    }) + '\n';
+    fs.appendFileSync(logPath, logEntry, 'utf8');
+  }
+  next();
+});
+// #endregion
 
 // Error handling
 app.use(notFoundHandler);
