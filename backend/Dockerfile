@@ -48,9 +48,9 @@ RUN npm install --omit=dev && npm cache clean --force
 # Copy built files from builder stage
 COPY --from=builder /app/backend/dist ./dist
 COPY --from=builder /app/backend/src/data ./src/data
-# Copy SQL files needed for migrations (to match dist structure)
-COPY --from=builder /app/backend/src/database/*.sql ./dist/src/database/
-COPY --from=builder /app/backend/src/database/migrations/*.sql ./dist/src/database/migrations/
+# Copy SQL files needed for migrations (to match dist structure: dist/backend/src/...)
+COPY --from=builder /app/backend/src/database/*.sql ./dist/backend/src/database/
+COPY --from=builder /app/backend/src/database/migrations/*.sql ./dist/backend/src/database/migrations/
 
 # #region agent log
 # Instrumentation: Verify copied files in final stage
@@ -77,7 +77,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 RUN echo 'const fs=require("fs");const path=require("path");const findFiles=(dir,pattern,results=[])=>{try{if(!fs.existsSync(dir))return results;const items=fs.readdirSync(dir);for(const item of items){const fullPath=path.join(dir,item);try{const stat=fs.statSync(fullPath);if(stat.isDirectory()){findFiles(fullPath,pattern,results);}else if(item.match(pattern)){results.push(fullPath.replace("/app/",""));}}catch(e){}}return results;}catch(e){return results;}};const log=(msg,data)=>{const entry={timestamp:Date.now(),message:msg,data:data||{}};console.error(JSON.stringify(entry));};const check={distExists:fs.existsSync("/app/dist"),distContents:fs.existsSync("/app/dist")?fs.readdirSync("/app/dist").map(f=>{const full=path.join("/app/dist",f);try{const s=fs.statSync(full);return{name:f,type:s.isDirectory()?"dir":"file"};}catch(e){return{name:f,error:e.message};}}):[],serverJsFiles:findFiles("/app","server\\.js$"),allDistFiles:findFiles("/app/dist",".*\\.js$").slice(0,30)};log("STARTUP_CHECK",check);' > /app/check-startup.js
 # #endregion
 
-# Start the server with path detection (try dist/src/server.js first based on package.json migrate script)
+# Start the server with path detection (try dist/backend/src/server.js first based on STARTUP_CHECK logs)
 # #region agent log
-CMD ["sh", "-c", "node /app/check-startup.js 2>&1; if [ -f /app/dist/src/server.js ]; then exec node dist/src/server.js; elif [ -f /app/dist/server.js ]; then exec node dist/server.js; else echo 'ERROR: server.js not found in dist/ or dist/src/. Check STARTUP_CHECK logs above for actual file locations.'; exit 1; fi"]
+CMD ["sh", "-c", "node /app/check-startup.js 2>&1; if [ -f /app/dist/backend/src/server.js ]; then exec node dist/backend/src/server.js; elif [ -f /app/dist/src/server.js ]; then exec node dist/src/server.js; elif [ -f /app/dist/server.js ]; then exec node dist/server.js; else echo 'ERROR: server.js not found. Check STARTUP_CHECK logs above for actual file locations.'; exit 1; fi"]
 # #endregion
