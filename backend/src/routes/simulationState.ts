@@ -8,30 +8,7 @@ import { param, validationResult } from 'express-validator';
 import { SimulationSession } from '../models/SimulationSession';
 import { DecisionEvent } from '../models/DecisionEvent';
 import { pool } from '../database/connection';
-// #region agent log
-import * as fs from 'fs';
-import * as path from 'path';
-const logPath = path.join(process.cwd(), '.cursor', 'debug.log');
-const sharedTypesPath = path.join(process.cwd(), 'shared', 'types', 'simulation.types.ts');
-const sharedTypesPathRelative = '../../../shared/types/simulation.types';
-try { 
-  const logDir = path.dirname(logPath);
-  if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir, { recursive: true });
-  }
-  fs.appendFileSync(logPath, JSON.stringify({location:'simulationState.ts:11',message:'BEFORE importing simulation.types - file executing',data:{hypothesisId:'MODULE_RESOLUTION',cwd:process.cwd(),__dirname:__dirname,sharedTypesPath,sharedTypesPathExists:fs.existsSync(sharedTypesPath),sharedTypesPathRelative,resolvedPath:path.resolve(__dirname, sharedTypesPathRelative + '.ts')},timestamp:Date.now()})+'\n'); 
-} catch(e) {
-  console.error('Log write error in simulationState.ts:', e);
-}
-// #endregion
 import { rebuildStateFromEvents, SimulationEvent } from '../../../shared/types/simulation.types';
-// #region agent log
-try { 
-  fs.appendFileSync(logPath, JSON.stringify({location:'simulationState.ts:25',message:'AFTER importing simulation.types - import completed',data:{hypothesisId:'MODULE_RESOLUTION',hasRebuildStateFromEvents:typeof rebuildStateFromEvents !== 'undefined'},timestamp:Date.now()})+'\n'); 
-} catch(e) {
-  console.error('Log write error:', e);
-}
-// #endregion
 
 const router = express.Router();
 

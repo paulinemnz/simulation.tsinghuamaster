@@ -4,21 +4,24 @@ FROM node:18-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY backend/package*.json ./
-COPY backend/tsconfig.json ./
+# Copy package files to backend directory to maintain structure
+COPY backend/package*.json ./backend/
+COPY backend/tsconfig.json ./backend/
 
-# Install dependencies
-RUN npm install
-
-# Copy source code and data files
-COPY backend/src/ ./src/
+# Copy shared directory to root level
 COPY shared/ ./shared/
 
-# Update tsconfig.json to include shared directory and remove rootDir restriction
-RUN node -e "const fs=require('fs'); const ts=JSON.parse(fs.readFileSync('tsconfig.json')); delete ts.compilerOptions.rootDir; if (!ts.include) ts.include=[]; if (!ts.include.includes('src/**/*')) ts.include.push('src/**/*'); if (!ts.include.includes('shared/**/*')) ts.include.push('shared/**/*'); fs.writeFileSync('tsconfig.json',JSON.stringify(ts,null,2));"
+# Install dependencies
+WORKDIR /app/backend
+RUN npm install
 
-# Build TypeScript
+# Copy source code
+COPY backend/src/ ./src/
+
+# Update tsconfig.json to include shared directory and remove rootDir restriction
+RUN node -e "const fs=require('fs'); const ts=JSON.parse(fs.readFileSync('tsconfig.json')); delete ts.compilerOptions.rootDir; if (!ts.include) ts.include=[]; if (!ts.include.includes('src/**/*')) ts.include.push('src/**/*'); if (!ts.include.includes('../shared/**/*')) ts.include.push('../shared/**/*'); fs.writeFileSync('tsconfig.json',JSON.stringify(ts,null,2));"
+
+# Build TypeScript (from backend directory)
 RUN npm run build
 
 # Production stage
@@ -33,11 +36,11 @@ COPY backend/package*.json ./
 RUN npm install --omit=dev && npm cache clean --force
 
 # Copy built files from builder stage
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src/data ./src/data
+COPY --from=builder /app/backend/dist ./dist
+COPY --from=builder /app/backend/src/data ./src/data
 # Copy SQL files needed for migrations (to match dist structure)
-COPY --from=builder /app/src/database/*.sql ./dist/src/database/
-COPY --from=builder /app/src/database/migrations/*.sql ./dist/src/database/migrations/
+COPY --from=builder /app/backend/src/database/*.sql ./dist/src/database/
+COPY --from=builder /app/backend/src/database/migrations/*.sql ./dist/src/database/migrations/
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
