@@ -31,8 +31,9 @@ RUN apk add --no-cache gettext
 # Copy built files from builder stage
 COPY --from=builder /app/build /usr/share/nginx/html
 
-# Create nginx config template that will use environment variable substitution
-RUN echo 'server { \
+# Create nginx config template directory and file
+RUN mkdir -p /etc/nginx/templates && \
+    echo 'server { \
     listen 80; \
     server_name _; \
     root /usr/share/nginx/html; \
