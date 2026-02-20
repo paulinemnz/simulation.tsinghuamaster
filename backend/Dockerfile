@@ -9,7 +9,7 @@ COPY backend/package*.json ./
 COPY backend/tsconfig.json ./
 
 # Install dependencies
-RUN npm ci --only=production=false
+RUN npm install
 
 # Copy source code and data files
 COPY backend/src/ ./src/
@@ -30,7 +30,7 @@ WORKDIR /app
 COPY backend/package*.json ./
 
 # Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --omit=dev && npm cache clean --force
 
 # Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
