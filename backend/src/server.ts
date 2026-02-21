@@ -133,7 +133,11 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   console.log('[HEALTH] Root / endpoint called');
   try {
-    res.json({ status: 'ok', service: 'backend', timestamp: new Date().toISOString() });
+    res.json({ 
+      status: 'ok', 
+      message: 'Backend is running',
+      timestamp: new Date().toISOString()
+    });
   } catch (error: any) {
     console.error('[HEALTH] Error in root endpoint:', error);
     res.status(500).json({ status: 'error', message: 'Service unavailable' });
