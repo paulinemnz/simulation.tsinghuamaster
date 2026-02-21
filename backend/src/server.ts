@@ -21,9 +21,26 @@ app.use(helmet());
 // Rate limiting - apply to all routes
 app.use(generalRateLimiter.middleware());
 
+// CORS configuration - allow frontend origin and requests through nginx proxy
 const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
+const allowedOrigins = corsOrigin.split(',').map(o => o.trim()).filter(Boolean);
+
 app.use(cors({
-  origin: corsOrigin,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, Postman, or same-origin requests through nginx)
+    if (!origin) {
+      return callback(null, true);
+    }
+    // Check if origin is in allowed list
+    if (allowedOrigins.some(allowed => origin === allowed || origin.startsWith(allowed))) {
+      return callback(null, true);
+    }
+    // For production, also allow Railway frontend domains
+    if (process.env.NODE_ENV === 'production' && origin.includes('.railway.app')) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -187,10 +204,11 @@ app.use(errorHandler);
 // Start server immediately - checks run in background but don't block
 // This ensures the server ALWAYS starts, even if checks fail
 try {
-  app.listen(PORT, () => {
+  // Listen on 0.0.0.0 to accept connections from Railway's network
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n✅ Server running on port ${PORT}`);
     console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`   Health check: http://localhost:${PORT}/health\n`);
+    console.log(`   Health check: http://0.0.0.0:${PORT}/health\n`);
   }).on('error', (error: any) => {
     console.error('Server listen error:', error);
   });
