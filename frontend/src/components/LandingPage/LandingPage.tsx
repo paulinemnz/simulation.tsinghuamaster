@@ -79,23 +79,23 @@ const LandingPage: React.FC = () => {
   // Check backend health silently (non-blocking, no error messages)
   useEffect(() => {
     const checkBackendHealth = async () => {
+      // In production (browser), ALWAYS use relative path so nginx can proxy it
+      // In development, use absolute URL
+      const isProduction = process.env.NODE_ENV === 'production' || 
+                          (typeof window !== 'undefined' && window.location.hostname.includes('railway.app'));
+      let healthUrl: string;
+      if (isProduction) {
+        // Production: use relative path (will be proxied by nginx)
+        healthUrl = '/health';
+      } else {
+        // Development: use absolute URL
+        const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+        healthUrl = apiBaseUrl.replace(/\/api\/?$/, '') + '/health';
+      }
+      
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000); // Quick 3s timeout
-        
-        // In production (browser), ALWAYS use relative path so nginx can proxy it
-        // In development, use absolute URL
-        const isProduction = process.env.NODE_ENV === 'production' || 
-                            (typeof window !== 'undefined' && window.location.hostname.includes('railway.app'));
-        let healthUrl: string;
-        if (isProduction) {
-          // Production: use relative path (will be proxied by nginx)
-          healthUrl = '/health';
-        } else {
-          // Development: use absolute URL
-          const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-          healthUrl = apiBaseUrl.replace(/\/api\/?$/, '') + '/health';
-        }
         
         // #region agent log
         const fullHealthUrl = healthUrl.startsWith('http') ? healthUrl : `${window.location.origin}${healthUrl}`;
