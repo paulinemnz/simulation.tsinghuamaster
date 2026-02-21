@@ -1,4 +1,5 @@
 # Frontend Dockerfile - Multi-stage build
+# Version: 2.0 - Added SSL proxy directives for Railway HTTPS backend
 FROM node:18-alpine AS builder
 
 # Set working directory
