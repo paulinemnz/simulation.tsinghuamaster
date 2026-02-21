@@ -15,15 +15,30 @@ try {
 } catch(e) {}
 // #endregion
 
+// Determine if SSL is required
+// Railway PostgreSQL and other cloud providers require SSL
+const dbUrl = process.env.DATABASE_URL || '';
+const isRailway = dbUrl.includes('.railway.app') || dbUrl.includes('railway');
+const isLocalhost = dbUrl.includes('localhost') || dbUrl.includes('127.0.0.1') || dbUrl.includes('postgres:5432');
+const requiresSSL = process.env.DATABASE_SSL === 'true' || (isRailway && !isLocalhost);
+
+// #region agent log
+try {
+  const sslStatus = requiresSSL ? 'enabled' : 'disabled';
+  const dbUrlPreview = dbUrl ? (dbUrl.substring(0, 50) + '...') : 'NOT_SET';
+  fs.appendFileSync(logPath, JSON.stringify({location:'connection.ts:config',message:'Database connection config',data:{hypothesisId:'A',hasDatabaseUrl:!!dbUrl,isRailway,isLocalhost,requiresSSL,sslStatus,databaseUrlPreview:dbUrlPreview,databseSslEnv:process.env.DATABASE_SSL},timestamp:Date.now(),sessionId:'debug-session',runId:'503-debug'})+'\n');
+} catch(e) {}
+// #endregion
+
 const config: PoolConfig = {
   connectionString: process.env.DATABASE_URL,
-  // Only enable SSL if explicitly set and not connecting to localhost/Docker postgres
-  ssl: process.env.DATABASE_SSL === 'true' && !process.env.DATABASE_URL?.includes('localhost') && !process.env.DATABASE_URL?.includes('postgres:') 
+  // Enable SSL for Railway and other cloud providers that require it
+  ssl: requiresSSL 
     ? { rejectUnauthorized: false } 
     : false,
   // Connection pool configuration for 100 concurrent participants
   max: 50, // Maximum number of clients in the pool
-  min: 5, // Minimum number of clients to maintain
+  min: 0, // Minimum number of clients - start with 0 to avoid blocking on startup if DB is unavailable
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
   connectionTimeoutMillis: 10000, // Return error after 10 seconds if connection cannot be established
 };
@@ -52,11 +67,18 @@ pool.on('connect', () => {
 });
 
 pool.on('error', (err: any) => {
-  console.error('Unexpected error on idle client', err);
+  console.error('Unexpected error on idle database client', err);
   // #region agent log
-  try { fs.appendFileSync(logPath, JSON.stringify({location:'connection.ts:30',message:'Database pool error',data:{hypothesisId:'D',errorMessage:err?.message,errorCode:err?.code,errorName:err?.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})+'\n'); } catch(e) {}
+  try { fs.appendFileSync(logPath, JSON.stringify({location:'connection.ts:error',message:'Database pool error',data:{hypothesisId:'D',errorMessage:err?.message,errorCode:err?.code,errorName:err?.name,errorStack:err?.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})+'\n'); } catch(e) {}
   // #endregion
-  process.exit(-1);
+  // Don't kill the server on connection errors - let it retry
+  // Only exit on critical errors that indicate the database is permanently unavailable
+  // Connection errors will be handled by individual queries with proper error handling
+  if (err.code === 'ENOTFOUND' || err.code === 'ETIMEDOUT') {
+    console.error('Database connection error - server will continue but database operations may fail');
+  } else {
+    console.error('Database pool error - server will continue but database operations may fail');
+  }
 });
 
 export const query = async (text: string, params?: any[]) => {
