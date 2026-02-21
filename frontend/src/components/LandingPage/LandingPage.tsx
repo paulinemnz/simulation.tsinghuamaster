@@ -79,16 +79,16 @@ const LandingPage: React.FC = () => {
   // Check backend health silently (non-blocking, no error messages)
   useEffect(() => {
     const checkBackendHealth = async () => {
-      // In production (browser), ALWAYS use relative path so nginx can proxy it
-      // In development, use absolute URL
-      const isProduction = process.env.NODE_ENV === 'production' || 
-                          (typeof window !== 'undefined' && window.location.hostname.includes('railway.app'));
+      // In browser (not localhost), ALWAYS use relative path so nginx can proxy it
+      // Only use absolute URLs in local development
+      const isBrowser = typeof window !== 'undefined';
+      const isLocalDev = !isBrowser || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       let healthUrl: string;
-      if (isProduction) {
-        // Production: use relative path (will be proxied by nginx)
+      if (isBrowser && !isLocalDev) {
+        // Browser (production/Railway): use relative path (will be proxied by nginx)
         healthUrl = '/health';
       } else {
-        // Development: use absolute URL
+        // Local development: use absolute URL
         const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
         healthUrl = apiBaseUrl.replace(/\/api\/?$/, '') + '/health';
       }
@@ -99,7 +99,7 @@ const LandingPage: React.FC = () => {
         
         // #region agent log
         const fullHealthUrl = healthUrl.startsWith('http') ? healthUrl : `${window.location.origin}${healthUrl}`;
-        fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:checkBackendHealth',message:'Health check URL determined',data:{healthUrl,fullHealthUrl,windowOrigin:window.location.origin,nodeEnv:process.env.NODE_ENV,reactAppApiUrl:process.env.REACT_APP_API_URL,isProduction},timestamp:Date.now(),runId:'503-debug',hypothesisId:'A'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:checkBackendHealth',message:'Health check URL determined',data:{healthUrl,fullHealthUrl,windowOrigin:window.location.origin,nodeEnv:process.env.NODE_ENV,reactAppApiUrl:process.env.REACT_APP_API_URL,isBrowser,isLocalDev},timestamp:Date.now(),runId:'503-debug',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
         
         const response = await fetch(healthUrl, {
@@ -217,12 +217,13 @@ const LandingPage: React.FC = () => {
       console.log('[LandingPage] Starting simulation:', { email: email.trim(), mode: selectedMode });
       
       // #region agent log
+      const isBrowser = typeof window !== 'undefined';
+      const isLocalDev = !isBrowser || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const apiBaseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
-      const isProduction = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname.includes('railway.app'));
-      const actualBaseURL = isProduction ? '/api' : apiBaseURL;
+      const actualBaseURL = (isBrowser && !isLocalDev) ? '/api' : apiBaseURL;
       const fullRequestURL = `${actualBaseURL}/simulations/start-with-mode`;
-      const absoluteRequestURL = isProduction ? `${window.location.origin}${fullRequestURL}` : fullRequestURL;
-      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:startSimulation',message:'About to make POST request to start-with-mode',data:{apiBaseURL,actualBaseURL,fullRequestURL,absoluteRequestURL,windowOrigin:window.location.origin,isProduction,endpoint:'/simulations/start-with-mode',requestBody:{participant_id:email.trim(),mode:selectedMode}},timestamp:Date.now(),runId:'503-debug',hypothesisId:'D'})}).catch(()=>{});
+      const absoluteRequestURL = (isBrowser && !isLocalDev) ? `${window.location.origin}${fullRequestURL}` : fullRequestURL;
+      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:startSimulation',message:'About to make POST request to start-with-mode',data:{apiBaseURL,actualBaseURL,fullRequestURL,absoluteRequestURL,windowOrigin:window.location.origin,isBrowser,isLocalDev,endpoint:'/simulations/start-with-mode',requestBody:{participant_id:email.trim(),mode:selectedMode}},timestamp:Date.now(),runId:'503-debug',hypothesisId:'D'})}).catch(()=>{});
       // #endregion
       
       // Start simulation with the selected mode

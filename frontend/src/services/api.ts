@@ -1,18 +1,20 @@
 import axios from 'axios';
 
-// Determine API URL: In production (browser), ALWAYS use relative path so nginx can proxy
-// This ensures we never use absolute URLs in production, even if REACT_APP_API_URL is set
-const isProduction = process.env.NODE_ENV === 'production' || 
-                     (typeof window !== 'undefined' && window.location.hostname.includes('railway.app'));
-const API_URL = isProduction 
-  ? '/api'  // Always use relative path in production - nginx will proxy to backend
+// Determine API URL: In browser, ALWAYS use relative path so nginx can proxy
+// This ensures we never use absolute URLs in the browser, even if REACT_APP_API_URL is set
+// Only use absolute URLs in development when running locally (not in browser)
+const isBrowser = typeof window !== 'undefined';
+const isLocalDev = !isBrowser || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_URL = isBrowser && !isLocalDev
+  ? '/api'  // Always use relative path in browser (production or Railway) - nginx will proxy to backend
   : (process.env.REACT_APP_API_URL || 'http://localhost:3001/api');
 
 console.log('[DEBUG] API service initialized:', { 
   apiURL: API_URL, 
   envVar: process.env.REACT_APP_API_URL, 
   nodeEnv: process.env.NODE_ENV,
-  isProduction: isProduction,
+  isBrowser: isBrowser,
+  isLocalDev: isLocalDev,
   hostname: typeof window !== 'undefined' ? window.location.hostname : 'server',
   usingRelativePath: API_URL === '/api'
 });
