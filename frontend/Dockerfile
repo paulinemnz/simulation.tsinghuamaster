@@ -1,5 +1,6 @@
 # Frontend Dockerfile - Multi-stage build
 # Version: 2.1 - Added SSL proxy directives for Railway HTTPS backend (cache-bust: 2026-02-21-06:20)
+# FORCE CLEAN BUILD - $(date +%s)
 FROM node:18-alpine AS builder
 
 # Set working directory
