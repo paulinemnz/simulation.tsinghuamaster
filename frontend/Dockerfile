@@ -161,14 +161,30 @@ RUN echo '#!/bin/sh' > /start-nginx.sh && \
     echo 'ORIGINAL_BACKEND_URL="$BACKEND_URL"' >> /start-nginx.sh && \
     echo 'if echo "$BACKEND_URL" | grep -qE "^https?://"; then' >> /start-nginx.sh && \
     echo '  echo "BACKEND_URL already has protocol prefix: $BACKEND_URL"' >> /start-nginx.sh && \
-    echo '  # For Railway internal service-to-service communication, use HTTP instead of HTTPS' >> /start-nginx.sh && \
-    echo '  # This avoids SSL handshake errors (503 with SSL routines::unexpected eof)' >> /start-nginx.sh && \
+    echo '  # For Railway services, try HTTP first for internal communication' >> /start-nginx.sh && \
+    echo '  # If HTTP fails, we can fall back to HTTPS' >> /start-nginx.sh && \
     echo '  if echo "$BACKEND_URL" | grep -qE "^https://.*\.railway\.app"; then' >> /start-nginx.sh && \
-    echo '    echo "INFO: Detected Railway HTTPS URL - converting to HTTP for internal service communication"' >> /start-nginx.sh && \
-    echo '    echo "This prevents SSL connection errors when services communicate within Railway'\''s network"' >> /start-nginx.sh && \
-    echo '    BACKEND_URL=$(echo "$BACKEND_URL" | sed "s|^https://|http://|")' >> /start-nginx.sh && \
-    echo '    echo "Converted BACKEND_URL to: $BACKEND_URL"' >> /start-nginx.sh && \
-    echo '    export BACKEND_URL' >> /start-nginx.sh && \
+    echo '    echo "INFO: Detected Railway HTTPS URL"' >> /start-nginx.sh && \
+    echo '    echo "Attempting to use HTTP for internal service communication (may fall back to HTTPS)"' >> /start-nginx.sh && \
+    echo '    HTTP_BACKEND_URL=$(echo "$BACKEND_URL" | sed "s|^https://|http://|")' >> /start-nginx.sh && \
+    echo '    echo "Testing HTTP connection: $HTTP_BACKEND_URL/health"' >> /start-nginx.sh && \
+    echo '    if command -v wget >/dev/null 2>&1; then' >> /start-nginx.sh && \
+    echo '      HTTP_TEST=$(wget --spider --timeout=3 --tries=1 "$HTTP_BACKEND_URL/health" 2>&1)' >> /start-nginx.sh && \
+    echo '      HTTP_TEST_EXIT=$?' >> /start-nginx.sh && \
+    echo '    elif command -v curl >/dev/null 2>&1; then' >> /start-nginx.sh && \
+    echo '      HTTP_TEST=$(curl -f --max-time 3 "$HTTP_BACKEND_URL/health" 2>&1)' >> /start-nginx.sh && \
+    echo '      HTTP_TEST_EXIT=$?' >> /start-nginx.sh && \
+    echo '    else' >> /start-nginx.sh && \
+    echo '      HTTP_TEST_EXIT=1' >> /start-nginx.sh && \
+    echo '    fi' >> /start-nginx.sh && \
+    echo '    if [ $HTTP_TEST_EXIT -eq 0 ]; then' >> /start-nginx.sh && \
+    echo '      echo "HTTP connection successful - using HTTP for backend communication"' >> /start-nginx.sh && \
+    echo '      BACKEND_URL="$HTTP_BACKEND_URL"' >> /start-nginx.sh && \
+    echo '      export BACKEND_URL' >> /start-nginx.sh && \
+    echo '    else' >> /start-nginx.sh && \
+    echo '      echo "HTTP connection failed - keeping HTTPS (Railway may require HTTPS)"' >> /start-nginx.sh && \
+    echo '      echo "Original BACKEND_URL will be used: $BACKEND_URL"' >> /start-nginx.sh && \
+    echo '    fi' >> /start-nginx.sh && \
     echo '  fi' >> /start-nginx.sh && \
     echo 'else' >> /start-nginx.sh && \
     echo '  echo "Adding https:// prefix to BACKEND_URL (original: $BACKEND_URL)"' >> /start-nginx.sh && \
