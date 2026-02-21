@@ -1,12 +1,20 @@
 import axios from 'axios';
 
-// Use relative path in production (will be proxied by nginx), absolute URL in development
-const API_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3001/api');
+// Determine API URL: In production (browser), ALWAYS use relative path so nginx can proxy
+// This ensures we never use absolute URLs in production, even if REACT_APP_API_URL is set
+const isProduction = process.env.NODE_ENV === 'production' || 
+                     (typeof window !== 'undefined' && window.location.hostname.includes('railway.app'));
+const API_URL = isProduction 
+  ? '/api'  // Always use relative path in production - nginx will proxy to backend
+  : (process.env.REACT_APP_API_URL || 'http://localhost:3001/api');
 
 console.log('[DEBUG] API service initialized:', { 
   apiURL: API_URL, 
   envVar: process.env.REACT_APP_API_URL, 
-  usingDefault: !process.env.REACT_APP_API_URL 
+  nodeEnv: process.env.NODE_ENV,
+  isProduction: isProduction,
+  hostname: typeof window !== 'undefined' ? window.location.hostname : 'server',
+  usingRelativePath: API_URL === '/api'
 });
 
 // #region agent log
@@ -53,6 +61,14 @@ api.interceptors.response.use(
       fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:error',message:'502 Bad Gateway error',data:{requestURL:error.config?.url,baseURL:error.config?.baseURL,fullURL:`${error.config?.baseURL}${error.config?.url}`},timestamp:Date.now(),runId:'502-debug',hypothesisId:'B'})}).catch(()=>{});
       // #endregion
       error.networkError = 'Error 502: Bad Gateway - nginx cannot reach the backend server. Please check that the backend service is running and BACKEND_URL is configured correctly.';
+    }
+    
+    // Handle 503 Service Unavailable errors (backend service is down or not responding)
+    if (error.response?.status === 503) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:error',message:'503 Service Unavailable error',data:{requestURL:error.config?.url,baseURL:error.config?.baseURL,fullURL:`${error.config?.baseURL}${error.config?.url}`},timestamp:Date.now(),runId:'503-debug',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      error.networkError = 'Error 503: Service Unavailable - the backend service is not responding. Please check backend service logs on Railway.';
     }
     
     // Handle network errors (no response from server)

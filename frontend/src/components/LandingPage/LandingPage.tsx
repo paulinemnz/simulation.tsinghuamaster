@@ -83,15 +83,17 @@ const LandingPage: React.FC = () => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000); // Quick 3s timeout
         
-        // In production, use relative path so nginx can proxy it
+        // In production (browser), ALWAYS use relative path so nginx can proxy it
         // In development, use absolute URL
+        const isProduction = process.env.NODE_ENV === 'production' || 
+                            (typeof window !== 'undefined' && window.location.hostname.includes('railway.app'));
         let healthUrl: string;
-        if (process.env.NODE_ENV === 'production' || !process.env.REACT_APP_API_URL) {
+        if (isProduction) {
           // Production: use relative path (will be proxied by nginx)
           healthUrl = '/health';
         } else {
           // Development: use absolute URL
-          const apiBaseUrl = process.env.REACT_APP_API_URL;
+          const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
           healthUrl = apiBaseUrl.replace(/\/api\/?$/, '') + '/health';
         }
         
