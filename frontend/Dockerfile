@@ -41,6 +41,10 @@ RUN mkdir -p /etc/nginx/templates && \
     root /usr/share/nginx/html; \
     index index.html; \
     \
+    # Enhanced error logging for SSL debugging \
+    error_log /var/log/nginx/error.log warn; \
+    access_log /var/log/nginx/access.log combined; \
+    \
     # Proxy API requests to backend \
     location /api { \
         proxy_pass $BACKEND_URL/api; \
@@ -53,9 +57,12 @@ RUN mkdir -p /etc/nginx/templates && \
         proxy_set_header X-Forwarded-Proto $scheme; \
         proxy_ssl_verify off; \
         proxy_ssl_server_name on; \
+        proxy_ssl_protocols TLSv1.2 TLSv1.3; \
+        proxy_ssl_ciphers HIGH:!aNULL:!MD5; \
         proxy_cache_bypass $http_upgrade; \
         proxy_read_timeout 300s; \
         proxy_connect_timeout 75s; \
+        proxy_buffering off; \
     } \
     \
     # Proxy simulations routes directly (for compatibility with existing frontend code) \
@@ -70,9 +77,12 @@ RUN mkdir -p /etc/nginx/templates && \
         proxy_set_header X-Forwarded-Proto $scheme; \
         proxy_ssl_verify off; \
         proxy_ssl_server_name on; \
+        proxy_ssl_protocols TLSv1.2 TLSv1.3; \
+        proxy_ssl_ciphers HIGH:!aNULL:!MD5; \
         proxy_cache_bypass $http_upgrade; \
         proxy_read_timeout 300s; \
         proxy_connect_timeout 75s; \
+        proxy_buffering off; \
     } \
     \
     # Health check endpoint (also proxy to backend) \
@@ -85,10 +95,13 @@ RUN mkdir -p /etc/nginx/templates && \
         proxy_set_header X-Forwarded-Proto $scheme; \
         proxy_ssl_verify off; \
         proxy_ssl_server_name on; \
+        proxy_ssl_protocols TLSv1.2 TLSv1.3; \
+        proxy_ssl_ciphers HIGH:!aNULL:!MD5; \
         proxy_connect_timeout 10s; \
         proxy_send_timeout 10s; \
         proxy_read_timeout 10s; \
         proxy_next_upstream error timeout invalid_header http_500 http_502 http_503; \
+        proxy_buffering off; \
     } \
     \
     # SPA routing \
@@ -148,6 +161,15 @@ RUN echo '#!/bin/sh' > /start-nginx.sh && \
     echo 'ORIGINAL_BACKEND_URL="$BACKEND_URL"' >> /start-nginx.sh && \
     echo 'if echo "$BACKEND_URL" | grep -qE "^https?://"; then' >> /start-nginx.sh && \
     echo '  echo "BACKEND_URL already has protocol prefix: $BACKEND_URL"' >> /start-nginx.sh && \
+    echo '  # For Railway internal service-to-service communication, use HTTP instead of HTTPS' >> /start-nginx.sh && \
+    echo '  # This avoids SSL handshake errors (503 with SSL routines::unexpected eof)' >> /start-nginx.sh && \
+    echo '  if echo "$BACKEND_URL" | grep -qE "^https://.*\.railway\.app"; then' >> /start-nginx.sh && \
+    echo '    echo "INFO: Detected Railway HTTPS URL - converting to HTTP for internal service communication"' >> /start-nginx.sh && \
+    echo '    echo "This prevents SSL connection errors when services communicate within Railway'\''s network"' >> /start-nginx.sh && \
+    echo '    BACKEND_URL=$(echo "$BACKEND_URL" | sed "s|^https://|http://|")' >> /start-nginx.sh && \
+    echo '    echo "Converted BACKEND_URL to: $BACKEND_URL"' >> /start-nginx.sh && \
+    echo '    export BACKEND_URL' >> /start-nginx.sh && \
+    echo '  fi' >> /start-nginx.sh && \
     echo 'else' >> /start-nginx.sh && \
     echo '  echo "Adding https:// prefix to BACKEND_URL (original: $BACKEND_URL)"' >> /start-nginx.sh && \
     echo '  export BACKEND_URL="https://$BACKEND_URL"' >> /start-nginx.sh && \
@@ -169,13 +191,30 @@ RUN echo '#!/bin/sh' > /start-nginx.sh && \
     echo 'echo "=== Testing backend connectivity ==="' >> /start-nginx.sh && \
     echo 'if command -v wget >/dev/null 2>&1; then' >> /start-nginx.sh && \
     echo '  echo "Testing: $BACKEND_URL/health"' >> /start-nginx.sh && \
-    echo '  wget --no-check-certificate --spider --timeout=5 --tries=1 "$BACKEND_URL/health" 2>&1 || echo "WARNING: Backend health check failed - nginx may return 503"' >> /start-nginx.sh && \
+    echo '  TEST_OUTPUT=$(wget --spider --timeout=5 --tries=1 "$BACKEND_URL/health" 2>&1)' >> /start-nginx.sh && \
+    echo '  TEST_EXIT=$?' >> /start-nginx.sh && \
+    echo '  echo "$TEST_OUTPUT"' >> /start-nginx.sh && \
+    echo '  if [ $TEST_EXIT -ne 0 ]; then' >> /start-nginx.sh && \
+    echo '    echo "WARNING: Backend health check failed (exit code: $TEST_EXIT)"' >> /start-nginx.sh && \
+    echo '    echo "This may cause 503 errors. Check nginx error logs for SSL connection details."' >> /start-nginx.sh && \
+    echo '  fi' >> /start-nginx.sh && \
     echo 'elif command -v curl >/dev/null 2>&1; then' >> /start-nginx.sh && \
     echo '  echo "Testing: $BACKEND_URL/health"' >> /start-nginx.sh && \
-    echo '  curl -k -f --max-time 5 "$BACKEND_URL/health" >/dev/null 2>&1 || echo "WARNING: Backend health check failed - nginx may return 503"' >> /start-nginx.sh && \
+    echo '  TEST_OUTPUT=$(curl -v --max-time 5 "$BACKEND_URL/health" 2>&1)' >> /start-nginx.sh && \
+    echo '  TEST_EXIT=$?' >> /start-nginx.sh && \
+    echo '  echo "$TEST_OUTPUT"' >> /start-nginx.sh && \
+    echo '  if [ $TEST_EXIT -ne 0 ]; then' >> /start-nginx.sh && \
+    echo '    echo "WARNING: Backend health check failed (exit code: $TEST_EXIT)"' >> /start-nginx.sh && \
+    echo '    echo "This may cause 503 errors. Check nginx error logs for SSL connection details."' >> /start-nginx.sh && \
+    echo '  fi' >> /start-nginx.sh && \
     echo 'else' >> /start-nginx.sh && \
     echo '  echo "WARNING: Cannot test backend connectivity (wget/curl not available)"' >> /start-nginx.sh && \
     echo 'fi' >> /start-nginx.sh && \
+    echo '' >> /start-nginx.sh && \
+    echo '# Log nginx error log location for debugging' >> /start-nginx.sh && \
+    echo 'echo "=== Nginx Error Log Location ==="' >> /start-nginx.sh && \
+    echo 'echo "Nginx error logs will be written to: /var/log/nginx/error.log"' >> /start-nginx.sh && \
+    echo 'echo "View logs with: docker exec <container> tail -f /var/log/nginx/error.log"' >> /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
     echo '# Validate generated config' >> /start-nginx.sh && \
     echo 'echo "=== Validating nginx config ==="' >> /start-nginx.sh && \
