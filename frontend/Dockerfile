@@ -49,6 +49,8 @@ RUN mkdir -p /etc/nginx/templates && \
         proxy_set_header X-Real-IP $remote_addr; \
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
         proxy_set_header X-Forwarded-Proto $scheme; \
+        proxy_ssl_verify off; \
+        proxy_ssl_server_name on; \
         proxy_cache_bypass $http_upgrade; \
         proxy_read_timeout 300s; \
         proxy_connect_timeout 75s; \
@@ -64,6 +66,8 @@ RUN mkdir -p /etc/nginx/templates && \
         proxy_set_header X-Real-IP $remote_addr; \
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
         proxy_set_header X-Forwarded-Proto $scheme; \
+        proxy_ssl_verify off; \
+        proxy_ssl_server_name on; \
         proxy_cache_bypass $http_upgrade; \
         proxy_read_timeout 300s; \
         proxy_connect_timeout 75s; \
@@ -77,6 +81,12 @@ RUN mkdir -p /etc/nginx/templates && \
         proxy_set_header X-Real-IP $remote_addr; \
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
         proxy_set_header X-Forwarded-Proto $scheme; \
+        proxy_ssl_verify off; \
+        proxy_ssl_server_name on; \
+        proxy_connect_timeout 10s; \
+        proxy_send_timeout 10s; \
+        proxy_read_timeout 10s; \
+        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503; \
     } \
     \
     # SPA routing \
@@ -112,9 +122,21 @@ RUN echo '#!/bin/sh' > /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
     echo '# Validate BACKEND_URL' >> /start-nginx.sh && \
     echo 'if [ -z "$BACKEND_URL" ] || [ "$BACKEND_URL" = "" ]; then' >> /start-nginx.sh && \
+    echo '  echo "========================================"' >> /start-nginx.sh && \
     echo '  echo "ERROR: BACKEND_URL environment variable is not set!"' >> /start-nginx.sh && \
-    echo '  echo "Please set BACKEND_URL in Railway environment variables to your backend service URL"' >> /start-nginx.sh && \
-    echo '  echo "Example: https://your-backend-service.up.railway.app"' >> /start-nginx.sh && \
+    echo '  echo "========================================"' >> /start-nginx.sh && \
+    echo '  echo ""' >> /start-nginx.sh && \
+    echo '  echo "To fix this in Railway:"' >> /start-nginx.sh && \
+    echo '  echo "1. Go to your Railway project dashboard"' >> /start-nginx.sh && \
+    echo '  echo "2. Select the FRONTEND service"' >> /start-nginx.sh && \
+    echo '  echo "3. Go to Variables tab"' >> /start-nginx.sh && \
+    echo '  echo "4. Add environment variable: BACKEND_URL"' >> /start-nginx.sh && \
+    echo '  echo "5. Set value to your backend service'\''s Railway URL"' >> /start-nginx.sh && \
+    echo '  echo "   Example: https://your-backend-service-name.up.railway.app"' >> /start-nginx.sh && \
+    echo '  echo "   (Get this from your backend service'\''s Settings > Domains)"' >> /start-nginx.sh && \
+    echo '  echo "6. Redeploy the frontend service"' >> /start-nginx.sh && \
+    echo '  echo ""' >> /start-nginx.sh && \
+    echo '  echo "Without BACKEND_URL, nginx cannot proxy requests and will return 503 errors."' >> /start-nginx.sh && \
     echo '  exit 1' >> /start-nginx.sh && \
     echo 'fi' >> /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
@@ -140,6 +162,18 @@ RUN echo '#!/bin/sh' > /start-nginx.sh && \
     echo 'grep -n "proxy_pass" /etc/nginx/conf.d/default.conf || echo "No proxy_pass found"' >> /start-nginx.sh && \
     echo 'echo "=== Full generated nginx config ==="' >> /start-nginx.sh && \
     echo 'cat /etc/nginx/conf.d/default.conf' >> /start-nginx.sh && \
+    echo '' >> /start-nginx.sh && \
+    echo '# Test backend connectivity' >> /start-nginx.sh && \
+    echo 'echo "=== Testing backend connectivity ==="' >> /start-nginx.sh && \
+    echo 'if command -v wget >/dev/null 2>&1; then' >> /start-nginx.sh && \
+    echo '  echo "Testing: $BACKEND_URL/health"' >> /start-nginx.sh && \
+    echo '  wget --spider --timeout=5 --tries=1 "$BACKEND_URL/health" 2>&1 || echo "WARNING: Backend health check failed - nginx may return 503"' >> /start-nginx.sh && \
+    echo 'elif command -v curl >/dev/null 2>&1; then' >> /start-nginx.sh && \
+    echo '  echo "Testing: $BACKEND_URL/health"' >> /start-nginx.sh && \
+    echo '  curl -f --max-time 5 "$BACKEND_URL/health" >/dev/null 2>&1 || echo "WARNING: Backend health check failed - nginx may return 503"' >> /start-nginx.sh && \
+    echo 'else' >> /start-nginx.sh && \
+    echo '  echo "WARNING: Cannot test backend connectivity (wget/curl not available)"' >> /start-nginx.sh && \
+    echo 'fi' >> /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
     echo '# Validate generated config' >> /start-nginx.sh && \
     echo 'echo "=== Validating nginx config ==="' >> /start-nginx.sh && \
