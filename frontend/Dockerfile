@@ -1,5 +1,5 @@
 # Frontend Dockerfile - Multi-stage build
-# Version: 2.0 - Added SSL proxy directives for Railway HTTPS backend
+# Version: 2.1 - Added SSL proxy directives for Railway HTTPS backend (cache-bust: 2026-02-21-06:20)
 FROM node:18-alpine AS builder
 
 # Set working directory
@@ -168,10 +168,10 @@ RUN echo '#!/bin/sh' > /start-nginx.sh && \
     echo 'echo "=== Testing backend connectivity ==="' >> /start-nginx.sh && \
     echo 'if command -v wget >/dev/null 2>&1; then' >> /start-nginx.sh && \
     echo '  echo "Testing: $BACKEND_URL/health"' >> /start-nginx.sh && \
-    echo '  wget --spider --timeout=5 --tries=1 "$BACKEND_URL/health" 2>&1 || echo "WARNING: Backend health check failed - nginx may return 503"' >> /start-nginx.sh && \
+    echo '  wget --no-check-certificate --spider --timeout=5 --tries=1 "$BACKEND_URL/health" 2>&1 || echo "WARNING: Backend health check failed - nginx may return 503"' >> /start-nginx.sh && \
     echo 'elif command -v curl >/dev/null 2>&1; then' >> /start-nginx.sh && \
     echo '  echo "Testing: $BACKEND_URL/health"' >> /start-nginx.sh && \
-    echo '  curl -f --max-time 5 "$BACKEND_URL/health" >/dev/null 2>&1 || echo "WARNING: Backend health check failed - nginx may return 503"' >> /start-nginx.sh && \
+    echo '  curl -k -f --max-time 5 "$BACKEND_URL/health" >/dev/null 2>&1 || echo "WARNING: Backend health check failed - nginx may return 503"' >> /start-nginx.sh && \
     echo 'else' >> /start-nginx.sh && \
     echo '  echo "WARNING: Cannot test backend connectivity (wget/curl not available)"' >> /start-nginx.sh && \
     echo 'fi' >> /start-nginx.sh && \
