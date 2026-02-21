@@ -192,10 +192,21 @@ RUN echo '#!/bin/sh' > /start-nginx.sh && \
     echo '  echo "Normalized BACKEND_URL: $BACKEND_URL"' >> /start-nginx.sh && \
     echo 'fi' >> /start-nginx.sh && \
     echo 'echo "Final BACKEND_URL for nginx config: $BACKEND_URL"' >> /start-nginx.sh && \
+    echo 'export BACKEND_URL' >> /start-nginx.sh && \
+    echo 'echo "BACKEND_URL exported: $BACKEND_URL"' >> /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
     echo '# Generate nginx config with substituted BACKEND_URL' >> /start-nginx.sh && \
     echo '# envsubst replaces $VARIABLE or ${VARIABLE} in the template' >> /start-nginx.sh && \
-    echo 'envsubst '"'"'$BACKEND_URL'"'"' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf' >> /start-nginx.sh && \
+    echo 'echo "Substituting BACKEND_URL in nginx template: $BACKEND_URL"' >> /start-nginx.sh && \
+    echo 'if ! envsubst '"'"'$BACKEND_URL'"'"' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf; then' >> /start-nginx.sh && \
+    echo '  echo "ERROR: Failed to generate nginx config!"' >> /start-nginx.sh && \
+    echo '  echo "BACKEND_URL value: $BACKEND_URL"' >> /start-nginx.sh && \
+    echo '  exit 1' >> /start-nginx.sh && \
+    echo 'fi' >> /start-nginx.sh && \
+    echo 'if [ ! -s /etc/nginx/conf.d/default.conf ]; then' >> /start-nginx.sh && \
+    echo '  echo "ERROR: Generated nginx config is empty!"' >> /start-nginx.sh && \
+    echo '  exit 1' >> /start-nginx.sh && \
+    echo 'fi' >> /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
     echo '# Debug: Show generated config (showing proxy_pass lines)' >> /start-nginx.sh && \
     echo 'echo "=== Generated nginx config (proxy_pass directives) ==="' >> /start-nginx.sh && \
