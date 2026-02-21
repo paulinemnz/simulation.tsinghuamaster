@@ -34,6 +34,7 @@ RUN apk add --no-cache gettext
 COPY --from=builder /app/build /usr/share/nginx/html
 
 # Create nginx config template directory and file
+# Note: SSL directives will be conditionally added by startup script based on backend URL protocol
 RUN mkdir -p /etc/nginx/templates && \
     echo 'server { \
     listen 80; \
@@ -41,7 +42,7 @@ RUN mkdir -p /etc/nginx/templates && \
     root /usr/share/nginx/html; \
     index index.html; \
     \
-    # Enhanced error logging for SSL debugging \
+    # Enhanced error logging \
     error_log /var/log/nginx/error.log warn; \
     access_log /var/log/nginx/access.log combined; \
     \
@@ -55,11 +56,7 @@ RUN mkdir -p /etc/nginx/templates && \
         proxy_set_header X-Real-IP $remote_addr; \
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
         proxy_set_header X-Forwarded-Proto $scheme; \
-        proxy_ssl_verify off; \
-        proxy_ssl_server_name on; \
-        proxy_ssl_protocols TLSv1.2 TLSv1.3; \
-        proxy_ssl_ciphers HIGH:!aNULL:!MD5; \
-        proxy_cache_bypass $http_upgrade; \
+$SSL_DIRECTIVES        proxy_cache_bypass $http_upgrade; \
         proxy_read_timeout 300s; \
         proxy_connect_timeout 75s; \
         proxy_buffering off; \
@@ -75,11 +72,7 @@ RUN mkdir -p /etc/nginx/templates && \
         proxy_set_header X-Real-IP $remote_addr; \
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
         proxy_set_header X-Forwarded-Proto $scheme; \
-        proxy_ssl_verify off; \
-        proxy_ssl_server_name on; \
-        proxy_ssl_protocols TLSv1.2 TLSv1.3; \
-        proxy_ssl_ciphers HIGH:!aNULL:!MD5; \
-        proxy_cache_bypass $http_upgrade; \
+$SSL_DIRECTIVES        proxy_cache_bypass $http_upgrade; \
         proxy_read_timeout 300s; \
         proxy_connect_timeout 75s; \
         proxy_buffering off; \
@@ -93,11 +86,7 @@ RUN mkdir -p /etc/nginx/templates && \
         proxy_set_header X-Real-IP $remote_addr; \
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
         proxy_set_header X-Forwarded-Proto $scheme; \
-        proxy_ssl_verify off; \
-        proxy_ssl_server_name on; \
-        proxy_ssl_protocols TLSv1.2 TLSv1.3; \
-        proxy_ssl_ciphers HIGH:!aNULL:!MD5; \
-        proxy_connect_timeout 10s; \
+$SSL_DIRECTIVES        proxy_connect_timeout 10s; \
         proxy_send_timeout 10s; \
         proxy_read_timeout 10s; \
         proxy_next_upstream error timeout invalid_header http_500 http_502 http_503; \
@@ -147,7 +136,8 @@ RUN echo '#!/bin/sh' > /start-nginx.sh && \
     echo '  echo "3. Go to Variables tab"' >> /start-nginx.sh && \
     echo '  echo "4. Add environment variable: BACKEND_URL"' >> /start-nginx.sh && \
     echo '  echo "5. Set value to your backend service'\''s Railway URL"' >> /start-nginx.sh && \
-    echo '  echo "   Example: https://your-backend-service-name.up.railway.app"' >> /start-nginx.sh && \
+    echo '  echo "   Example: http://service-name.railway.internal (for internal)"' >> /start-nginx.sh && \
+    echo '  echo "   Example: https://service-name.up.railway.app (for public)"' >> /start-nginx.sh && \
     echo '  echo "   (Get this from your backend service'\''s Settings > Domains)"' >> /start-nginx.sh && \
     echo '  echo "6. Redeploy the frontend service"' >> /start-nginx.sh && \
     echo '  echo ""' >> /start-nginx.sh && \
@@ -161,44 +151,30 @@ RUN echo '#!/bin/sh' > /start-nginx.sh && \
     echo 'ORIGINAL_BACKEND_URL="$BACKEND_URL"' >> /start-nginx.sh && \
     echo 'if echo "$BACKEND_URL" | grep -qE "^https?://"; then' >> /start-nginx.sh && \
     echo '  echo "BACKEND_URL already has protocol prefix: $BACKEND_URL"' >> /start-nginx.sh && \
-    echo '  # For Railway services, try HTTP first for internal communication' >> /start-nginx.sh && \
-    echo '  # If HTTP fails, we can fall back to HTTPS' >> /start-nginx.sh && \
-    echo '  if echo "$BACKEND_URL" | grep -qE "^https://.*\.railway\.app"; then' >> /start-nginx.sh && \
-    echo '    echo "INFO: Detected Railway HTTPS URL"' >> /start-nginx.sh && \
-    echo '    echo "Attempting to use HTTP for internal service communication (may fall back to HTTPS)"' >> /start-nginx.sh && \
-    echo '    HTTP_BACKEND_URL=$(echo "$BACKEND_URL" | sed "s|^https://|http://|")' >> /start-nginx.sh && \
-    echo '    echo "Testing HTTP connection: $HTTP_BACKEND_URL/health"' >> /start-nginx.sh && \
-    echo '    if command -v wget >/dev/null 2>&1; then' >> /start-nginx.sh && \
-    echo '      HTTP_TEST=$(wget --spider --timeout=3 --tries=1 "$HTTP_BACKEND_URL/health" 2>&1)' >> /start-nginx.sh && \
-    echo '      HTTP_TEST_EXIT=$?' >> /start-nginx.sh && \
-    echo '    elif command -v curl >/dev/null 2>&1; then' >> /start-nginx.sh && \
-    echo '      HTTP_TEST=$(curl -f --max-time 3 "$HTTP_BACKEND_URL/health" 2>&1)' >> /start-nginx.sh && \
-    echo '      HTTP_TEST_EXIT=$?' >> /start-nginx.sh && \
-    echo '    else' >> /start-nginx.sh && \
-    echo '      HTTP_TEST_EXIT=1' >> /start-nginx.sh && \
-    echo '    fi' >> /start-nginx.sh && \
-    echo '    if [ $HTTP_TEST_EXIT -eq 0 ]; then' >> /start-nginx.sh && \
-    echo '      echo "HTTP connection successful - using HTTP for backend communication"' >> /start-nginx.sh && \
-    echo '      BACKEND_URL="$HTTP_BACKEND_URL"' >> /start-nginx.sh && \
-    echo '      export BACKEND_URL' >> /start-nginx.sh && \
-    echo '    else' >> /start-nginx.sh && \
-    echo '      echo "HTTP connection failed - keeping HTTPS (Railway may require HTTPS)"' >> /start-nginx.sh && \
-    echo '      echo "Original BACKEND_URL will be used: $BACKEND_URL"' >> /start-nginx.sh && \
-    echo '    fi' >> /start-nginx.sh && \
-    echo '  fi' >> /start-nginx.sh && \
     echo 'else' >> /start-nginx.sh && \
-    echo '  echo "Adding https:// prefix to BACKEND_URL (original: $BACKEND_URL)"' >> /start-nginx.sh && \
-    echo '  export BACKEND_URL="https://$BACKEND_URL"' >> /start-nginx.sh && \
+    echo '  echo "Adding http:// prefix to BACKEND_URL (original: $BACKEND_URL)"' >> /start-nginx.sh && \
+    echo '  export BACKEND_URL="http://$BACKEND_URL"' >> /start-nginx.sh && \
     echo '  echo "Normalized BACKEND_URL: $BACKEND_URL"' >> /start-nginx.sh && \
     echo 'fi' >> /start-nginx.sh && \
     echo 'echo "Final BACKEND_URL for nginx config: $BACKEND_URL"' >> /start-nginx.sh && \
     echo 'export BACKEND_URL' >> /start-nginx.sh && \
     echo 'echo "BACKEND_URL exported: $BACKEND_URL"' >> /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
-    echo '# Generate nginx config with substituted BACKEND_URL' >> /start-nginx.sh && \
+    echo '# Determine if backend uses HTTPS and set SSL directives accordingly' >> /start-nginx.sh && \
+    echo 'if echo "$BACKEND_URL" | grep -qE "^https://"; then' >> /start-nginx.sh && \
+    echo '  echo "Detected HTTPS backend - including SSL directives in nginx config"' >> /start-nginx.sh && \
+    echo '  export SSL_DIRECTIVES="        proxy_ssl_verify off;        proxy_ssl_server_name on;        proxy_ssl_protocols TLSv1.2 TLSv1.3;        proxy_ssl_ciphers HIGH:!aNULL:!MD5;"' >> /start-nginx.sh && \
+    echo 'else' >> /start-nginx.sh && \
+    echo '  echo "Detected HTTP backend - omitting SSL directives from nginx config"' >> /start-nginx.sh && \
+    echo '  export SSL_DIRECTIVES=""' >> /start-nginx.sh && \
+    echo 'fi' >> /start-nginx.sh && \
+    echo '' >> /start-nginx.sh && \
+    echo '# Generate nginx config with substituted BACKEND_URL and SSL_DIRECTIVES' >> /start-nginx.sh && \
     echo '# envsubst replaces $VARIABLE or ${VARIABLE} in the template' >> /start-nginx.sh && \
-    echo 'echo "Substituting BACKEND_URL in nginx template: $BACKEND_URL"' >> /start-nginx.sh && \
-    echo 'if ! envsubst '"'"'$BACKEND_URL'"'"' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf; then' >> /start-nginx.sh && \
+    echo 'echo "Substituting BACKEND_URL and SSL_DIRECTIVES in nginx template"' >> /start-nginx.sh && \
+    echo 'echo "  BACKEND_URL: $BACKEND_URL"' >> /start-nginx.sh && \
+    echo 'echo "  SSL_DIRECTIVES: $SSL_DIRECTIVES"' >> /start-nginx.sh && \
+    echo 'if ! envsubst '"'"'$BACKEND_URL $SSL_DIRECTIVES'"'"' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf; then' >> /start-nginx.sh && \
     echo '  echo "ERROR: Failed to generate nginx config!"' >> /start-nginx.sh && \
     echo '  echo "BACKEND_URL value: $BACKEND_URL"' >> /start-nginx.sh && \
     echo '  exit 1' >> /start-nginx.sh && \
@@ -211,11 +187,10 @@ RUN echo '#!/bin/sh' > /start-nginx.sh && \
     echo '# Debug: Show generated config (showing proxy_pass lines)' >> /start-nginx.sh && \
     echo 'echo "=== Generated nginx config (proxy_pass directives) ==="' >> /start-nginx.sh && \
     echo 'grep -n "proxy_pass" /etc/nginx/conf.d/default.conf || echo "No proxy_pass found"' >> /start-nginx.sh && \
-    echo 'echo "=== Full generated nginx config ==="' >> /start-nginx.sh && \
-    echo 'cat /etc/nginx/conf.d/default.conf' >> /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
-    echo '# Test backend connectivity' >> /start-nginx.sh && \
+    echo '# Test backend connectivity (non-fatal - frontend should still serve static files)' >> /start-nginx.sh && \
     echo 'echo "=== Testing backend connectivity ==="' >> /start-nginx.sh && \
+    echo 'set +e' >> /start-nginx.sh && \
     echo 'if command -v wget >/dev/null 2>&1; then' >> /start-nginx.sh && \
     echo '  echo "Testing: $BACKEND_URL/health"' >> /start-nginx.sh && \
     echo '  TEST_OUTPUT=$(wget --spider --timeout=5 --tries=1 "$BACKEND_URL/health" 2>&1)' >> /start-nginx.sh && \
@@ -223,20 +198,26 @@ RUN echo '#!/bin/sh' > /start-nginx.sh && \
     echo '  echo "$TEST_OUTPUT"' >> /start-nginx.sh && \
     echo '  if [ $TEST_EXIT -ne 0 ]; then' >> /start-nginx.sh && \
     echo '    echo "WARNING: Backend health check failed (exit code: $TEST_EXIT)"' >> /start-nginx.sh && \
-    echo '    echo "This may cause 503 errors. Check nginx error logs for SSL connection details."' >> /start-nginx.sh && \
+    echo '    echo "Frontend will still start and serve static files, but API calls may fail."' >> /start-nginx.sh && \
+    echo '  else' >> /start-nginx.sh && \
+    echo '    echo "SUCCESS: Backend is reachable"' >> /start-nginx.sh && \
     echo '  fi' >> /start-nginx.sh && \
     echo 'elif command -v curl >/dev/null 2>&1; then' >> /start-nginx.sh && \
     echo '  echo "Testing: $BACKEND_URL/health"' >> /start-nginx.sh && \
-    echo '  TEST_OUTPUT=$(curl -v --max-time 5 "$BACKEND_URL/health" 2>&1)' >> /start-nginx.sh && \
+    echo '  TEST_OUTPUT=$(curl -f --max-time 5 "$BACKEND_URL/health" 2>&1)' >> /start-nginx.sh && \
     echo '  TEST_EXIT=$?' >> /start-nginx.sh && \
     echo '  echo "$TEST_OUTPUT"' >> /start-nginx.sh && \
     echo '  if [ $TEST_EXIT -ne 0 ]; then' >> /start-nginx.sh && \
     echo '    echo "WARNING: Backend health check failed (exit code: $TEST_EXIT)"' >> /start-nginx.sh && \
-    echo '    echo "This may cause 503 errors. Check nginx error logs for SSL connection details."' >> /start-nginx.sh && \
+    echo '    echo "Frontend will still start and serve static files, but API calls may fail."' >> /start-nginx.sh && \
+    echo '  else' >> /start-nginx.sh && \
+    echo '    echo "SUCCESS: Backend is reachable"' >> /start-nginx.sh && \
     echo '  fi' >> /start-nginx.sh && \
     echo 'else' >> /start-nginx.sh && \
     echo '  echo "WARNING: Cannot test backend connectivity (wget/curl not available)"' >> /start-nginx.sh && \
+    echo '  echo "Frontend will start anyway - backend connectivity will be tested at runtime."' >> /start-nginx.sh && \
     echo 'fi' >> /start-nginx.sh && \
+    echo 'set -e' >> /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
     echo '# Log nginx error log location for debugging' >> /start-nginx.sh && \
     echo 'echo "=== Nginx Error Log Location ==="' >> /start-nginx.sh && \
@@ -245,7 +226,12 @@ RUN echo '#!/bin/sh' > /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
     echo '# Validate generated config' >> /start-nginx.sh && \
     echo 'echo "=== Validating nginx config ==="' >> /start-nginx.sh && \
-    echo 'nginx -t' >> /start-nginx.sh && \
+    echo 'if ! nginx -t 2>&1; then' >> /start-nginx.sh && \
+    echo '  echo "ERROR: nginx config validation failed!"' >> /start-nginx.sh && \
+    echo '  echo "Generated config:"' >> /start-nginx.sh && \
+    echo '  cat /etc/nginx/conf.d/default.conf' >> /start-nginx.sh && \
+    echo '  exit 1' >> /start-nginx.sh && \
+    echo 'fi' >> /start-nginx.sh && \
     echo '' >> /start-nginx.sh && \
     echo '# Start nginx' >> /start-nginx.sh && \
     echo 'echo "=== Starting nginx ==="' >> /start-nginx.sh && \
