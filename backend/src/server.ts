@@ -110,9 +110,15 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
   next();
 });
 
-// Health check
+// Health check - must be defined before error handlers
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  console.log('[HEALTH] Health check endpoint called');
+  try {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  } catch (error: any) {
+    console.error('[HEALTH] Error in health check:', error);
+    res.status(500).json({ status: 'error', message: 'Health check failed' });
+  }
 });
 
 // Debug endpoint to test start-with-mode
@@ -203,17 +209,37 @@ app.use(errorHandler);
 
 // Start server immediately - checks run in background but don't block
 // This ensures the server ALWAYS starts, even if checks fail
+console.log(`[STARTUP] Attempting to start server on port ${PORT}...`);
+console.log(`[STARTUP] PORT environment variable: ${process.env.PORT}`);
+console.log(`[STARTUP] NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+
 try {
   // Listen on 0.0.0.0 to accept connections from Railway's network
-  app.listen(PORT, '0.0.0.0', () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n✅ Server running on port ${PORT}`);
     console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`   Health check: http://0.0.0.0:${PORT}/health\n`);
-  }).on('error', (error: any) => {
-    console.error('Server listen error:', error);
+    console.log(`   Health check: http://0.0.0.0:${PORT}/health`);
+    console.log(`   Server address: ${JSON.stringify(server.address())}\n`);
   });
+  
+  server.on('error', (error: any) => {
+    console.error('[STARTUP ERROR] Server listen error:', error);
+    console.error('[STARTUP ERROR] Error code:', error.code);
+    console.error('[STARTUP ERROR] Error message:', error.message);
+    if (error.code === 'EADDRINUSE') {
+      console.error(`[STARTUP ERROR] Port ${PORT} is already in use`);
+    }
+    process.exit(1);
+  });
+  
+  server.on('listening', () => {
+    const addr = server.address();
+    console.log(`[STARTUP] Server is listening on:`, addr);
+  });
+  
 } catch (error: any) {
-  console.error('Failed to start server:', error);
+  console.error('[STARTUP ERROR] Failed to start server:', error);
+  console.error('[STARTUP ERROR] Error stack:', error.stack);
   process.exit(1);
 }
 
@@ -225,12 +251,17 @@ runStartupChecks().catch((error: any) => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  console.error('[ERROR] Unhandled Rejection at:', promise);
+  console.error('[ERROR] Reason:', reason);
+  console.error('[ERROR] Stack:', reason?.stack);
+  // Don't exit - let the server continue running
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error: Error) => {
-  console.error('Uncaught Exception:', error);
+  console.error('[FATAL] Uncaught Exception:', error);
+  console.error('[FATAL] Stack:', error.stack);
+  // Exit on uncaught exceptions as they indicate serious problems
   process.exit(1);
 });
 
