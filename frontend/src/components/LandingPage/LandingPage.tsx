@@ -98,7 +98,8 @@ const LandingPage: React.FC = () => {
         }
         
         // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:checkBackendHealth',message:'Health check URL determined',data:{healthUrl,nodeEnv:process.env.NODE_ENV,reactAppApiUrl:process.env.REACT_APP_API_URL},timestamp:Date.now(),runId:'502-debug',hypothesisId:'A'})}).catch(()=>{});
+        const fullHealthUrl = healthUrl.startsWith('http') ? healthUrl : `${window.location.origin}${healthUrl}`;
+        fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:checkBackendHealth',message:'Health check URL determined',data:{healthUrl,fullHealthUrl,windowOrigin:window.location.origin,nodeEnv:process.env.NODE_ENV,reactAppApiUrl:process.env.REACT_APP_API_URL,isProduction},timestamp:Date.now(),runId:'503-debug',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
         
         const response = await fetch(healthUrl, {
@@ -109,7 +110,7 @@ const LandingPage: React.FC = () => {
         clearTimeout(timeoutId);
         
         // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:checkBackendHealth',message:'Health check response received',data:{status:response.status,statusText:response.statusText,ok:response.ok,url:response.url},timestamp:Date.now(),runId:'502-debug',hypothesisId:'A'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:checkBackendHealth',message:'Health check response received',data:{status:response.status,statusText:response.statusText,ok:response.ok,url:response.url,responseUrl:response.url},timestamp:Date.now(),runId:'503-debug',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
         
         if (response.ok) {
@@ -128,7 +129,8 @@ const LandingPage: React.FC = () => {
         }
       } catch (err: any) {
         // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:checkBackendHealth',message:'Health check error',data:{errorMessage:err?.message,errorName:err?.name,errorStack:err?.stack},timestamp:Date.now(),runId:'502-debug',hypothesisId:'A'})}).catch(()=>{});
+        const fullHealthUrl = healthUrl.startsWith('http') ? healthUrl : `${window.location.origin}${healthUrl}`;
+        fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:checkBackendHealth',message:'Health check error',data:{errorMessage:err?.message,errorName:err?.name,errorCode:err?.code,healthUrl,fullHealthUrl,windowOrigin:window.location.origin,hasResponse:!!err?.response,responseStatus:err?.response?.status,responseStatusText:err?.response?.statusText},timestamp:Date.now(),runId:'503-debug',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
         // Silently handle errors - don't show error messages
         // Just mark backend as offline
@@ -216,8 +218,11 @@ const LandingPage: React.FC = () => {
       
       // #region agent log
       const apiBaseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
-      const fullURL = `${apiBaseURL}/simulations/start-with-mode`;
-      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:198',message:'About to make POST request to start-with-mode',data:{apiBaseURL,fullURL,endpoint:'/simulations/start-with-mode',requestBody:{participant_id:email.trim(),mode:selectedMode}},timestamp:Date.now(),runId:'debug-405',hypothesisId:'D'})}).catch(()=>{});
+      const isProduction = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname.includes('railway.app'));
+      const actualBaseURL = isProduction ? '/api' : apiBaseURL;
+      const fullRequestURL = `${actualBaseURL}/simulations/start-with-mode`;
+      const absoluteRequestURL = isProduction ? `${window.location.origin}${fullRequestURL}` : fullRequestURL;
+      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:startSimulation',message:'About to make POST request to start-with-mode',data:{apiBaseURL,actualBaseURL,fullRequestURL,absoluteRequestURL,windowOrigin:window.location.origin,isProduction,endpoint:'/simulations/start-with-mode',requestBody:{participant_id:email.trim(),mode:selectedMode}},timestamp:Date.now(),runId:'503-debug',hypothesisId:'D'})}).catch(()=>{});
       // #endregion
       
       // Start simulation with the selected mode
@@ -225,6 +230,10 @@ const LandingPage: React.FC = () => {
         participant_id: email.trim(),
         mode: selectedMode,
       });
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:startSimulation',message:'start-with-mode response received',data:{status:response.status,statusText:response.statusText,responseUrl:response.config?.url,baseURL:response.config?.baseURL,fullURL:response.config?.url ? `${response.config.baseURL}${response.config.url}` : 'unknown'},timestamp:Date.now(),runId:'503-debug',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
 
       console.log('[LandingPage] API response received:', response.data);
       console.log('[LandingPage] Response status:', response.status);
@@ -312,7 +321,8 @@ const LandingPage: React.FC = () => {
         code: err?.code
       });
       // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:279',message:'Error caught in startSimulation',data:{errorMessage:err?.message,responseStatus:err?.response?.status,responseData:err?.response?.data,requestURL:err?.config?.url,requestMethod:err?.config?.method,baseURL:err?.config?.baseURL,fullRequestURL:`${err?.config?.baseURL}${err?.config?.url}`},timestamp:Date.now(),runId:'debug-405',hypothesisId:'D'})}).catch(()=>{});
+      const windowOrigin = typeof window !== 'undefined' ? window.location.origin : 'server';
+      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:startSimulation',message:'Error caught in startSimulation',data:{errorMessage:err?.message,errorCode:err?.code,responseStatus:err?.response?.status,responseStatusText:err?.response?.statusText,responseData:err?.response?.data,responseHeaders:err?.response?.headers,requestURL:err?.config?.url,requestMethod:err?.config?.method,baseURL:err?.config?.baseURL,fullRequestURL:err?.config?.baseURL && err?.config?.url ? `${err.config.baseURL}${err.config.url}` : 'unknown',windowOrigin,networkError:err?.networkError},timestamp:Date.now(),runId:'503-debug',hypothesisId:'D'})}).catch(()=>{});
       // #endregion
       
       // Extract error message - ALWAYS show error to user

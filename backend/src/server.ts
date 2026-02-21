@@ -121,6 +121,27 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
 // Railway checks both / and /health
 app.get('/health', (req, res) => {
   console.log('[HEALTH] /health endpoint called');
+  // #region agent log
+  const fs = require('fs');
+  const logPath = 'c:\\Pauline\\qinghua\\year three\\thesis\\mid thesis defense\\Cursor 2\\.cursor\\debug.log';
+  const logEntry = JSON.stringify({
+    id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    timestamp: Date.now(),
+    location: 'server.ts:/health',
+    message: 'Health endpoint called',
+    data: { 
+      method: req.method, 
+      path: req.path, 
+      originalUrl: req.originalUrl, 
+      headers: { host: req.headers.host, 'user-agent': req.headers['user-agent'], origin: req.headers.origin, referer: req.headers.referer },
+      ip: req.ip,
+      ips: req.ips
+    },
+    runId: '503-debug',
+    hypothesisId: 'B'
+  }) + '\n';
+  try { fs.appendFileSync(logPath, logEntry, 'utf8'); } catch (e) {}
+  // #endregion
   try {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   } catch (error: any) {
@@ -132,6 +153,27 @@ app.get('/health', (req, res) => {
 // Root endpoint for Railway health checks
 app.get('/', (req, res) => {
   console.log('[HEALTH] Root / endpoint called');
+  // #region agent log
+  const fs = require('fs');
+  const logPath = 'c:\\Pauline\\qinghua\\year three\\thesis\\mid thesis defense\\Cursor 2\\.cursor\\debug.log';
+  const logEntry = JSON.stringify({
+    id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    timestamp: Date.now(),
+    location: 'server.ts:/',
+    message: 'Root endpoint called',
+    data: { 
+      method: req.method, 
+      path: req.path, 
+      originalUrl: req.originalUrl, 
+      headers: { host: req.headers.host, 'user-agent': req.headers['user-agent'], origin: req.headers.origin, referer: req.headers.referer },
+      ip: req.ip,
+      ips: req.ips
+    },
+    runId: '503-debug',
+    hypothesisId: 'B'
+  }) + '\n';
+  try { fs.appendFileSync(logPath, logEntry, 'utf8'); } catch (e) {}
+  // #endregion
   try {
     res.json({ 
       status: 'ok', 

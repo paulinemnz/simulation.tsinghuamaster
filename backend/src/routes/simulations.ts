@@ -36,13 +36,28 @@ router.post(
     const logEntry = JSON.stringify({
       id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: Date.now(),
-      location: 'simulations.ts:32',
+      location: 'simulations.ts:start-with-mode',
       message: 'POST /start-with-mode handler invoked',
-      data: { method: req.method, path: req.path, body: req.body, headers: req.headers },
-      runId: 'debug-405',
+      data: { 
+        method: req.method, 
+        path: req.path, 
+        originalUrl: req.originalUrl,
+        body: req.body, 
+        headers: { 
+          host: req.headers.host, 
+          'user-agent': req.headers['user-agent'], 
+          origin: req.headers.origin, 
+          referer: req.headers.referer,
+          'x-forwarded-for': req.headers['x-forwarded-for'],
+          'x-real-ip': req.headers['x-real-ip']
+        },
+        ip: req.ip,
+        ips: req.ips
+      },
+      runId: '503-debug',
       hypothesisId: 'B'
     }) + '\n';
-    fs.appendFileSync(logPath, logEntry, 'utf8');
+    try { fs.appendFileSync(logPath, logEntry, 'utf8'); } catch (e) {}
     // #endregion
     console.log('Start-with-mode request body:', req.body);
     console.log('[API] POST /start-with-mode - Request received', {

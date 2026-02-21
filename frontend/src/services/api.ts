@@ -66,7 +66,11 @@ api.interceptors.response.use(
     // Handle 503 Service Unavailable errors (backend service is down or not responding)
     if (error.response?.status === 503) {
       // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:error',message:'503 Service Unavailable error',data:{requestURL:error.config?.url,baseURL:error.config?.baseURL,fullURL:`${error.config?.baseURL}${error.config?.url}`},timestamp:Date.now(),runId:'503-debug',hypothesisId:'C'})}).catch(()=>{});
+      const fullRequestUrl = error.config?.baseURL && error.config?.url 
+        ? `${error.config.baseURL}${error.config.url}` 
+        : error.config?.url || 'unknown';
+      const windowOrigin = typeof window !== 'undefined' ? window.location.origin : 'server';
+      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:error',message:'503 Service Unavailable error',data:{requestURL:error.config?.url,baseURL:error.config?.baseURL,fullRequestUrl,windowOrigin,responseHeaders:error.response?.headers,responseData:error.response?.data},timestamp:Date.now(),runId:'503-debug',hypothesisId:'C'})}).catch(()=>{});
       // #endregion
       error.networkError = 'Error 503: Service Unavailable - the backend service is not responding. Please check backend service logs on Railway.';
     }
