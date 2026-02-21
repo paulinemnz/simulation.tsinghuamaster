@@ -64,7 +64,14 @@ app.use((req, res, next) => {
   next();
 });
 // #endregion
-app.use(morgan('dev'));
+// Request logging - log ALL incoming requests to debug routing issues
+app.use((req, res, next) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[REQUEST ${timestamp}] ${req.method} ${req.path} from ${req.ip || 'unknown'}`);
+  console.log(`[REQUEST ${timestamp}] Headers:`, JSON.stringify(req.headers));
+  next();
+});
+app.use(morgan('combined'));
 
 try {
   // JSON body parser with size limit (10MB) to prevent memory exhaustion
@@ -110,14 +117,26 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
   next();
 });
 
-// Health check - must be defined before error handlers
+// Health check endpoints - must be defined before error handlers
+// Railway checks both / and /health
 app.get('/health', (req, res) => {
-  console.log('[HEALTH] Health check endpoint called');
+  console.log('[HEALTH] /health endpoint called');
   try {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   } catch (error: any) {
     console.error('[HEALTH] Error in health check:', error);
     res.status(500).json({ status: 'error', message: 'Health check failed' });
+  }
+});
+
+// Root endpoint for Railway health checks
+app.get('/', (req, res) => {
+  console.log('[HEALTH] Root / endpoint called');
+  try {
+    res.json({ status: 'ok', service: 'backend', timestamp: new Date().toISOString() });
+  } catch (error: any) {
+    console.error('[HEALTH] Error in root endpoint:', error);
+    res.status(500).json({ status: 'error', message: 'Service unavailable' });
   }
 });
 
@@ -235,6 +254,13 @@ try {
   server.on('listening', () => {
     const addr = server.address();
     console.log(`[STARTUP] Server is listening on:`, addr);
+    console.log(`[STARTUP] Server is ready to accept connections`);
+    console.log(`[STARTUP] Test health: curl http://localhost:${PORT}/health`);
+  });
+  
+  // Ensure server is actually ready
+  server.on('connection', (socket) => {
+    console.log(`[CONNECTION] New connection from ${socket.remoteAddress}:${socket.remotePort}`);
   });
   
 } catch (error: any) {

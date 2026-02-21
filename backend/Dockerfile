@@ -65,12 +65,13 @@ RUN addgroup -g 1001 -S nodejs && \
 RUN chown -R nodejs:nodejs /app
 USER nodejs
 
-# Expose port
-EXPOSE 3001
+# Expose port (Railway sets PORT env var dynamically)
+# Use PORT env var or default to 3001 for documentation
+EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+# Health check - use PORT env var (Railway sets this)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD node -e "const port=process.env.PORT||'3001'; require('http').get('http://localhost:'+port+'/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)}).on('error',()=>process.exit(1))"
 
 # #region agent log
 # Create comprehensive startup check script to find server.js
