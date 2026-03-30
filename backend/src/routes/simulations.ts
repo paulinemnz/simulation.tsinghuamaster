@@ -89,11 +89,28 @@ router.post(
       // This is non-destructive and prevents "column identifier does not exist" runtime errors.
       try {
         const hasIdentifier = await hasColumn('users', 'identifier');
+        const hasLegacyEmail = await hasColumn('users', 'email');
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'simulations.ts:start-with-mode:schemaCheck',message:'users schema columns presence',data:{hasIdentifier,hasLegacyEmail},timestamp:Date.now(),runId:'pre-fix',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+
+        // Log nullability of legacy email column if present
+        if (hasLegacyEmail) {
+          const emailCol = await pool.query(
+            `SELECT is_nullable
+             FROM information_schema.columns
+             WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'email'
+             LIMIT 1`
+          );
+          const isNullable = emailCol.rows?.[0]?.is_nullable;
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'simulations.ts:start-with-mode:emailNullability',message:'users.email nullability',data:{isNullable},timestamp:Date.now(),runId:'pre-fix',hypothesisId:'A'})}).catch(()=>{});
+          // #endregion
+        }
         if (!hasIdentifier) {
           console.warn('[API] users.identifier column missing; applying safe runtime schema patch');
           await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS identifier VARCHAR(255)');
           // Backfill identifier for existing rows using name, legacy email, or id
-          const hasLegacyEmail = await hasColumn('users', 'email');
           if (hasLegacyEmail) {
             await pool.query(
               `UPDATE users
@@ -114,6 +131,9 @@ router.post(
         }
       } catch (schemaErr: any) {
         console.warn('[API] Failed to apply runtime schema patch for users.identifier (continuing):', schemaErr?.message);
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'simulations.ts:start-with-mode:schemaPatchError',message:'Runtime schema patch failed',data:{message:schemaErr?.message,code:schemaErr?.code,name:schemaErr?.name},timestamp:Date.now(),runId:'pre-fix',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
       }
 
       // Helper function to check if string is a valid UUID
@@ -187,12 +207,23 @@ router.post(
             
             if (userResult.rows.length === 0) {
               const defaultPassword = await bcrypt.hash('auto_created_' + timestamp, 10);
-              const userInsert = await pool.query(
-                `INSERT INTO users (identifier, password_hash, role, name)
-                 VALUES ($1, $2, $3, $4)
-                 RETURNING id`,
-                [sanitizedIdentifier, defaultPassword, 'participant', participantIdInput]
-              );
+              let userInsert;
+              try {
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'simulations.ts:start-with-mode:userInsertAttempt',message:'Attempting INSERT into users',data:{insertColumns:['identifier','password_hash','role','name'],identifierPrefix:String(sanitizedIdentifier).slice(0,24),role:'participant',hasName:!!participantIdInput},timestamp:Date.now(),runId:'pre-fix',hypothesisId:'B'})}).catch(()=>{});
+                // #endregion
+                userInsert = await pool.query(
+                  `INSERT INTO users (identifier, password_hash, role, name)
+                   VALUES ($1, $2, $3, $4)
+                   RETURNING id`,
+                  [sanitizedIdentifier, defaultPassword, 'participant', participantIdInput]
+                );
+              } catch (insertErr: any) {
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'simulations.ts:start-with-mode:userInsertError',message:'INSERT into users failed',data:{message:insertErr?.message,code:insertErr?.code,detail:insertErr?.detail,constraint:insertErr?.constraint},timestamp:Date.now(),runId:'pre-fix',hypothesisId:'B'})}).catch(()=>{});
+                // #endregion
+                throw insertErr;
+              }
               user = { id: userInsert.rows[0].id };
             } else {
               user = { id: userResult.rows[0].id };

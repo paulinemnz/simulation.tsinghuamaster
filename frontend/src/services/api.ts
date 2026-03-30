@@ -39,6 +39,9 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   // #region agent log
+  fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:request:debug',message:'API request initiated (no sessionId)',data:{url:config.url,method:config.method,baseURL:config.baseURL},timestamp:Date.now(),runId:'email-removal-debug',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
+  // #region agent log
   fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:request',message:'API request initiated',data:{url:config.url,method:config.method,baseURL:config.baseURL,fullURL:`${config.baseURL}${config.url}`},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
   // #endregion
   return config;
@@ -53,6 +56,9 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:error:debug',message:'API error intercepted (no sessionId)',data:{errorMessage:error.message,errorCode:error.code,hasResponse:!!error.response,responseStatus:error.response?.status,requestURL:error.config?.url,baseURL:error.config?.baseURL,responseData:error.response?.data||null},timestamp:Date.now(),runId:'email-removal-debug',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     // #region agent log
     fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:error',message:'API error intercepted',data:{errorMessage:error.message,errorCode:error.code,hasResponse:!!error.response,responseStatus:error.response?.status,requestURL:error.config?.url,baseURL:error.config?.baseURL},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
     // #endregion

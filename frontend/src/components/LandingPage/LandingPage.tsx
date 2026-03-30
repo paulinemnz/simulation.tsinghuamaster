@@ -154,6 +154,9 @@ const LandingPage: React.FC = () => {
 
   const handleStartSimulation = async () => {
     // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:handleStartSimulation',message:'Begin simulation pressed',data:{selectedMode,origin:typeof window!=='undefined'?window.location.origin:'server',nodeEnv:process.env.NODE_ENV},timestamp:Date.now(),runId:'email-removal-debug',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    // #region agent log
     fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:24',message:'handleStartSimulation called',data:{selectedMode},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
     // #endregion
     
@@ -179,6 +182,9 @@ const LandingPage: React.FC = () => {
       const actualBaseURL = (isBrowser && !isLocalDev) ? '/api' : apiBaseURL;
       const fullRequestURL = `${actualBaseURL}/simulations/start-with-mode`;
       const absoluteRequestURL = (isBrowser && !isLocalDev) ? `${window.location.origin}${fullRequestURL}` : fullRequestURL;
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:startSimulation:url',message:'Start-with-mode URL computed',data:{actualBaseURL,fullRequestURL,absoluteRequestURL,isBrowser,isLocalDev},timestamp:Date.now(),runId:'email-removal-debug',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:startSimulation',message:'About to make POST request to start-with-mode',data:{apiBaseURL,actualBaseURL,fullRequestURL,absoluteRequestURL,windowOrigin:window.location.origin,isBrowser,isLocalDev,endpoint:'/simulations/start-with-mode',requestBody:{mode:selectedMode}},timestamp:Date.now(),runId:'503-debug',hypothesisId:'D'})}).catch(()=>{});
       // #endregion
       
@@ -189,6 +195,9 @@ const LandingPage: React.FC = () => {
       
       // #region agent log
       fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:startSimulation',message:'start-with-mode response received',data:{status:response.status,statusText:response.statusText,responseUrl:response.config?.url,baseURL:response.config?.baseURL,fullURL:response.config?.url ? `${response.config.baseURL}${response.config.url}` : 'unknown'},timestamp:Date.now(),runId:'503-debug',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:startSimulation:response',message:'Start-with-mode response (sanitized)',data:{status:response.status,ok:response.data?.ok,hasSessionId:!!response.data?.sessionId,hasParticipantCode:!!response.data?.participantCode,error:response.data?.error||null},timestamp:Date.now(),runId:'email-removal-debug',hypothesisId:'C'})}).catch(()=>{});
       // #endregion
 
       console.log('[LandingPage] API response received:', response.data);
@@ -286,6 +295,9 @@ const LandingPage: React.FC = () => {
       // #region agent log
       const windowOrigin = typeof window !== 'undefined' ? window.location.origin : 'server';
       fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:startSimulation',message:'Error caught in startSimulation',data:{errorMessage:err?.message,errorCode:err?.code,responseStatus:err?.response?.status,responseStatusText:err?.response?.statusText,responseData:err?.response?.data,responseHeaders:err?.response?.headers,requestURL:err?.config?.url,requestMethod:err?.config?.method,baseURL:err?.config?.baseURL,fullRequestURL:err?.config?.baseURL && err?.config?.url ? `${err.config.baseURL}${err.config.url}` : 'unknown',windowOrigin,networkError:err?.networkError},timestamp:Date.now(),runId:'503-debug',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:startSimulation:error',message:'Start-with-mode error (sanitized)',data:{message:err?.message,code:err?.code,status:err?.response?.status,responseError:err?.response?.data?.error||err?.response?.data?.message||null,networkError:err?.networkError||null},timestamp:Date.now(),runId:'email-removal-debug',hypothesisId:'C'})}).catch(()=>{});
       // #endregion
       
       // Extract error message - ALWAYS show error to user
