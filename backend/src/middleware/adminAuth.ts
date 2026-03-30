@@ -27,8 +27,8 @@ export const authenticateAdmin = async (
       if (user && user.role === 'admin') {
         req.user = {
           id: user.id!,
-          email: user.email,
-          role: user.role
+          role: user.role,
+          identifier: user.identifier
         };
         return next();
       }
@@ -41,8 +41,8 @@ export const authenticateAdmin = async (
       if (decoded?.role === 'admin') {
         req.user = {
           id: 'admin-secret',
-          email: 'admin@secret',
-          role: 'admin'
+          role: 'admin',
+          identifier: 'admin-secret'
         };
         return next();
       }

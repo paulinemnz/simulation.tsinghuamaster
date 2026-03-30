@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 
 export interface UserData {
   id?: string;
-  email: string;
+  identifier: string;
   password_hash?: string;
   password?: string;
   role: 'participant' | 'researcher' | 'admin';
@@ -19,26 +19,26 @@ export class User {
       : data.password_hash;
 
     const result = await pool.query(
-      `INSERT INTO users (email, password_hash, role, name)
+      `INSERT INTO users (identifier, password_hash, role, name)
        VALUES ($1, $2, $3, $4)
-       RETURNING id, email, role, name, created_at, updated_at`,
-      [data.email, hashedPassword, data.role, data.name || null]
+       RETURNING id, identifier, role, name, created_at, updated_at`,
+      [data.identifier, hashedPassword, data.role, data.name || null]
     );
 
     return result.rows[0];
   }
 
-  static async findByEmail(email: string): Promise<UserData | null> {
+  static async findByIdentifier(identifier: string): Promise<UserData | null> {
     const result = await pool.query(
-      'SELECT * FROM users WHERE email = $1',
-      [email]
+      'SELECT * FROM users WHERE identifier = $1',
+      [identifier]
     );
     return result.rows[0] || null;
   }
 
   static async findById(id: string): Promise<UserData | null> {
     const result = await pool.query(
-      'SELECT id, email, role, name, created_at, updated_at FROM users WHERE id = $1',
+      'SELECT id, identifier, role, name, created_at, updated_at FROM users WHERE id = $1',
       [id]
     );
     return result.rows[0] || null;

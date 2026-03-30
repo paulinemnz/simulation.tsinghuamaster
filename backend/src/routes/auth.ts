@@ -11,7 +11,7 @@ const router = express.Router();
 router.post(
   '/register',
   [
-    body('email').isEmail().withMessage('Valid email is required'),
+    body('identifier').notEmpty().withMessage('Identifier is required'),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
     body('role').isIn(['participant', 'researcher']).withMessage('Role must be participant or researcher'),
     body('name').optional().isString(),
@@ -24,13 +24,13 @@ router.post(
       }
 
       // Check if user already exists
-      const existingUser = await User.findByEmail(req.body.email);
+      const existingUser = await User.findByIdentifier(req.body.identifier);
       if (existingUser) {
-        return res.status(400).json({ status: 'error', message: 'Email already registered' });
+        return res.status(400).json({ status: 'error', message: 'Identifier already registered' });
       }
 
       const user = await User.create({
-        email: req.body.email,
+        identifier: req.body.identifier,
         password: req.body.password,
         role: req.body.role,
         name: req.body.name,
@@ -43,7 +43,7 @@ router.post(
         data: {
           user: {
             id: user.id,
-            email: user.email,
+            identifier: user.identifier,
             role: user.role,
             name: user.name,
           },
@@ -60,7 +60,7 @@ router.post(
 router.post(
   '/login',
   [
-    body('email').isEmail().withMessage('Valid email is required'),
+    body('identifier').notEmpty().withMessage('Identifier is required'),
     body('password').notEmpty().withMessage('Password is required'),
   ],
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -70,7 +70,7 @@ router.post(
         return res.status(400).json({ status: 'error', errors: errors.array() });
       }
 
-      const user = await User.findByEmail(req.body.email);
+      const user = await User.findByIdentifier(req.body.identifier);
       if (!user || !user.password_hash) {
         return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
       }
@@ -87,7 +87,7 @@ router.post(
         data: {
           user: {
             id: user.id,
-            email: user.email,
+            identifier: user.identifier,
             role: user.role,
             name: user.name,
           },
@@ -115,7 +115,7 @@ router.get(
         status: 'success',
         data: {
           id: user.id,
-          email: user.email,
+          identifier: user.identifier,
           role: user.role,
           name: user.name,
         }

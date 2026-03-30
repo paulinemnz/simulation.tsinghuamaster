@@ -19,14 +19,6 @@ const router = express.Router();
 router.post(
   '/start-with-mode',
   [
-    body('participant_id')
-      .custom((value) => {
-        if (!value || typeof value !== 'string' || value.trim().length === 0) {
-          throw new Error('Participant ID is required');
-        }
-        return true;
-      })
-      .withMessage('Participant ID is required'),
     body('mode').isIn(['C0', 'C1', 'C2']).withMessage('Mode must be C0, C1, or C2'),
   ],
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -76,16 +68,11 @@ router.post(
         });
       }
 
-      const participantIdInput = req.body.participant_id?.trim();
+      // participant_id is optional now; server will generate an anonymous participant code if not provided
+      const providedParticipantId = typeof req.body.participant_id === 'string' ? req.body.participant_id.trim() : '';
       const mode = req.body.mode as 'C0' | 'C1' | 'C2';
 
-      if (!participantIdInput) {
-        console.error('[API] Empty participant ID after trim');
-        return res.status(400).json({ 
-          ok: false, 
-          error: 'Participant ID is required' 
-        });
-      }
+      const participantIdInput = providedParticipantId || Participant.generateParticipantCode();
 
       if (!mode || !['C0', 'C1', 'C2'].includes(mode)) {
         console.error('[API] Invalid mode:', mode);
@@ -105,7 +92,7 @@ router.post(
 
       // Try to find participant by ID (UUID) or participant_code
       let participant = null;
-      if (isUUID(participantIdInput)) {
+      if (providedParticipantId && isUUID(participantIdInput)) {
         try {
           participant = await Participant.findById(participantIdInput);
         } catch (error: any) {
@@ -114,7 +101,7 @@ router.post(
         }
       }
       
-      if (!participant) {
+      if (!participant && providedParticipantId) {
         try {
           participant = await Participant.findByParticipantCode(participantIdInput);
         } catch (error: any) {
@@ -147,9 +134,8 @@ router.post(
           }
           
           // Create a user for this participant
-          // Use a more unique email to avoid conflicts
           const timestamp = Date.now();
-          const sanitizedEmail = `participant_${participantIdInput.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${timestamp}@auto.local`;
+          const sanitizedIdentifier = `participant_${participantIdInput.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${timestamp}`;
           let user;
           
           // Try to find existing user by name first
@@ -161,19 +147,19 @@ router.post(
           if (userByNameResult.rows.length > 0) {
             user = { id: userByNameResult.rows[0].id };
           } else {
-            // Check if email already exists (unlikely but possible)
+            // Check if identifier already exists (unlikely but possible)
             const userResult = await pool.query(
-              'SELECT id FROM users WHERE email = $1 LIMIT 1',
-              [sanitizedEmail]
+              'SELECT id FROM users WHERE identifier = $1 LIMIT 1',
+              [sanitizedIdentifier]
             );
             
             if (userResult.rows.length === 0) {
               const defaultPassword = await bcrypt.hash('auto_created_' + timestamp, 10);
               const userInsert = await pool.query(
-                `INSERT INTO users (email, password_hash, role, name)
+                `INSERT INTO users (identifier, password_hash, role, name)
                  VALUES ($1, $2, $3, $4)
                  RETURNING id`,
-                [sanitizedEmail, defaultPassword, 'participant', participantIdInput]
+                [sanitizedIdentifier, defaultPassword, 'participant', participantIdInput]
               );
               user = { id: userInsert.rows[0].id };
             } else {
@@ -380,10 +366,11 @@ router.post(
       }
 
       // Return simplified response
-      console.log('[API] Session created successfully, returning response:', { sessionId: session.id });
+      console.log('[API] Session created successfully, returning response:', { sessionId: session.id, participantCode: participant.participant_code });
       return res.status(201).json({ 
         ok: true, 
-        sessionId: session.id 
+        sessionId: session.id,
+        participantCode: participant.participant_code
       });
     } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : String(error);

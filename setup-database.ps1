@@ -31,6 +31,16 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host "✓ Base schema created" -ForegroundColor Green
 
+# Remove any legacy email storage from users table (if upgrading an existing DB)
+Write-Host "Removing legacy email storage from users..." -ForegroundColor Yellow
+$removeEmailPath = Join-Path $backendPath "src\database\migrations\remove_email_from_users.sql"
+if (Test-Path $removeEmailPath) {
+    Get-Content $removeEmailPath | docker exec -i tsinghua-sem-db psql -U sim_user -d simulation_db
+    Write-Host "✓ Legacy email storage removed" -ForegroundColor Green
+} else {
+    Write-Host "Warning: remove_email_from_users migration not found" -ForegroundColor Yellow
+}
+
 # Run Act tables migration
 Write-Host "Creating Act tables..." -ForegroundColor Yellow
 $actTablesPath = Join-Path $backendPath "src\database\migrations\add_act_tables.sql"

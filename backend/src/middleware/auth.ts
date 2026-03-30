@@ -5,8 +5,8 @@ import { User } from '../models/User';
 export interface AuthRequest extends Request {
   user?: {
     id: string;
-    email: string;
     role: string;
+    identifier?: string;
   };
 }
 
@@ -30,8 +30,8 @@ export const authenticateToken = async (
     if (decoded.isAdmin && decoded.id === 'admin') {
       req.user = {
         id: 'admin',
-        email: 'admin@system',
         role: 'admin',
+        identifier: 'admin',
       };
       return next();
     }
@@ -44,8 +44,8 @@ export const authenticateToken = async (
 
     req.user = {
       id: user.id!,
-      email: user.email,
       role: user.role,
+      identifier: user.identifier,
     };
 
     next();

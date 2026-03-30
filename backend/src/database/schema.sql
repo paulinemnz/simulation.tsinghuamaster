@@ -6,7 +6,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Users table (participants and researchers)
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email VARCHAR(255) UNIQUE NOT NULL,
+    identifier VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL CHECK (role IN ('participant', 'researcher', 'admin')),
     name VARCHAR(255),
@@ -231,7 +231,7 @@ CREATE TABLE computed_scores (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_identifier ON users(identifier);
 CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_participants_user_id ON participants(user_id);
 CREATE INDEX idx_participants_session_id ON participants(session_id);

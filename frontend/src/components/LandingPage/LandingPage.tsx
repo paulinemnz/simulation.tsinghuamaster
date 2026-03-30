@@ -17,7 +17,6 @@ const LandingPage: React.FC = () => {
   fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:11',message:'LandingPage component function called',data:{windowLocation:window.location.pathname,hasDocument:!!document},timestamp:Date.now(),sessionId:'debug-session',runId:'landing-visibility-debug',hypothesisId:'A'})}).catch(()=>{});
   // #endregion
   
-  const [email, setEmail] = useState('');
   const [selectedMode, setSelectedMode] = useState<'C0' | 'C1' | 'C2' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +54,6 @@ const LandingPage: React.FC = () => {
     });
     
     // Reset local state
-    setEmail('');
     setSelectedMode(null);
     setError(null);
     
@@ -154,53 +152,11 @@ const LandingPage: React.FC = () => {
     // #endregion
   };
 
-  const validateEmail = (email: string): boolean => {
-    // More permissive validation that accepts international email addresses
-    // including Chinese and other Unicode characters
-    // Basic check: has @ symbol, has at least one character before @, 
-    // has at least one character after @, and contains a dot after @
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail || trimmedEmail.length < 3) {
-      return false;
-    }
-    
-    const atIndex = trimmedEmail.indexOf('@');
-    if (atIndex <= 0 || atIndex >= trimmedEmail.length - 1) {
-      return false;
-    }
-    
-    const localPart = trimmedEmail.substring(0, atIndex);
-    const domainPart = trimmedEmail.substring(atIndex + 1);
-    
-    // Check that local part is not empty and domain part contains at least a dot
-    if (!localPart || !domainPart || !domainPart.includes('.')) {
-      return false;
-    }
-    
-    // Check that domain part has at least one character after the last dot
-    const lastDotIndex = domainPart.lastIndexOf('.');
-    if (lastDotIndex === -1 || lastDotIndex >= domainPart.length - 1) {
-      return false;
-    }
-    
-    return true;
-  };
-
   const handleStartSimulation = async () => {
     // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:24',message:'handleStartSimulation called',data:{email:email.trim(),selectedMode},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:24',message:'handleStartSimulation called',data:{selectedMode},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
     // #endregion
     
-    if (!email.trim()) {
-      setError('Please enter your email address');
-      return;
-    }
-
-    if (!validateEmail(email.trim())) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
     if (!selectedMode) {
       setError('Please select a mode');
       return;
@@ -210,11 +166,11 @@ const LandingPage: React.FC = () => {
     setError(null);
     
     // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:38',message:'About to make API call',data:{email:email.trim(),mode:selectedMode,apiBaseURL:process.env.REACT_APP_API_URL||'http://localhost:3001/api'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:38',message:'About to make API call',data:{mode:selectedMode,apiBaseURL:process.env.REACT_APP_API_URL||'http://localhost:3001/api'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
     // #endregion
 
     try {
-      console.log('[LandingPage] Starting simulation:', { email: email.trim(), mode: selectedMode });
+      console.log('[LandingPage] Starting simulation:', { mode: selectedMode });
       
       // #region agent log
       const isBrowser = typeof window !== 'undefined';
@@ -223,12 +179,11 @@ const LandingPage: React.FC = () => {
       const actualBaseURL = (isBrowser && !isLocalDev) ? '/api' : apiBaseURL;
       const fullRequestURL = `${actualBaseURL}/simulations/start-with-mode`;
       const absoluteRequestURL = (isBrowser && !isLocalDev) ? `${window.location.origin}${fullRequestURL}` : fullRequestURL;
-      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:startSimulation',message:'About to make POST request to start-with-mode',data:{apiBaseURL,actualBaseURL,fullRequestURL,absoluteRequestURL,windowOrigin:window.location.origin,isBrowser,isLocalDev,endpoint:'/simulations/start-with-mode',requestBody:{participant_id:email.trim(),mode:selectedMode}},timestamp:Date.now(),runId:'503-debug',hypothesisId:'D'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:startSimulation',message:'About to make POST request to start-with-mode',data:{apiBaseURL,actualBaseURL,fullRequestURL,absoluteRequestURL,windowOrigin:window.location.origin,isBrowser,isLocalDev,endpoint:'/simulations/start-with-mode',requestBody:{mode:selectedMode}},timestamp:Date.now(),runId:'503-debug',hypothesisId:'D'})}).catch(()=>{});
       // #endregion
       
       // Start simulation with the selected mode
       const response = await api.post('/simulations/start-with-mode', {
-        participant_id: email.trim(),
         mode: selectedMode,
       });
       
@@ -243,6 +198,7 @@ const LandingPage: React.FC = () => {
       // Handle simplified response format: { ok: true, sessionId } or { ok: false, error }
       if (response.data && response.data.ok === true && response.data.sessionId) {
         const sessionId = response.data.sessionId;
+        const participantCode = response.data.participantCode;
         
         console.log('[LandingPage] Session created successfully:', sessionId);
         
@@ -261,14 +217,20 @@ const LandingPage: React.FC = () => {
         );
         oldStateKeys.forEach(key => localStorage.removeItem(key));
         
-        // Store email and mode in localStorage for session management
-        localStorage.setItem('participantId', email.trim());
+        // Store participant code and mode in localStorage for session management
+        if (participantCode && typeof participantCode === 'string') {
+          localStorage.setItem('participantId', participantCode);
+        } else {
+          // Fallback: use sessionId as stable identifier if server didn't return a participant code
+          localStorage.setItem('participantId', sessionId);
+        }
         localStorage.setItem('simulationMode', selectedMode);
         localStorage.setItem('simulationSessionId', sessionId);
 
         // Completely reset simulation state for new session
+        const storedParticipantId = localStorage.getItem('participantId') || sessionId;
         resetSimulationState({
-          participantId: email.trim(),
+          participantId: storedParticipantId,
           sessionId,
           mode: 'real',
           currentAct: 1,
@@ -281,7 +243,7 @@ const LandingPage: React.FC = () => {
           derivedIdentityTrack: null
         });
         
-        console.log('[LandingPage] Reset simulation state for new session:', { sessionId, email: email.trim() });
+        console.log('[LandingPage] Reset simulation state for new session:', { sessionId, participantId: localStorage.getItem('participantId') });
         
         // Navigate to ethical agreement before intro
         const navigationPath = `/sim/${sessionId}/ethics`;
@@ -358,7 +320,7 @@ const LandingPage: React.FC = () => {
   };
 
   // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:263',message:'LandingPage about to return JSX',data:{email:email.length,selectedMode,error:!!error,hasNavigate:!!navigate},timestamp:Date.now(),sessionId:'debug-session',runId:'landing-visibility-debug',hypothesisId:'B'})}).catch(()=>{});
+  fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LandingPage.tsx:263',message:'LandingPage about to return JSX',data:{selectedMode,error:!!error,hasNavigate:!!navigate},timestamp:Date.now(),sessionId:'debug-session',runId:'landing-visibility-debug',hypothesisId:'B'})}).catch(()=>{});
   // #endregion
   
   // #region agent log
@@ -461,29 +423,6 @@ const LandingPage: React.FC = () => {
         </div>
 
         <div className="landing-content">
-          <div className="participant-input-section">
-            <label htmlFor="email-address" className="input-label">
-              Email Address
-            </label>
-            <input
-              id="email-address"
-              type="email"
-              className="participant-input"
-              placeholder="Enter your email address"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setError(null);
-              }}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && email && selectedMode) {
-                  handleStartSimulation();
-                }
-              }}
-              disabled={loading}
-            />
-          </div>
-
           <div className="mode-selection-section">
             <div className="mode-buttons">
               <button
@@ -546,7 +485,7 @@ const LandingPage: React.FC = () => {
             <button
               className="start-button"
               onClick={handleStartSimulation}
-              disabled={loading || !email.trim() || !selectedMode}
+              disabled={loading || !selectedMode}
             >
               {loading ? (
                 <span className="loading-text">
@@ -557,20 +496,6 @@ const LandingPage: React.FC = () => {
                 'Begin Simulation'
               )}
             </button>
-          </div>
-
-          <div className="email-note" style={{
-            marginTop: '24px',
-            padding: '16px',
-            backgroundColor: '#f8f9fa',
-            border: '1px solid #e9ecef',
-            borderRadius: '4px',
-            fontSize: '0.9rem',
-            color: '#6c757d',
-            textAlign: 'center',
-            lineHeight: '1.5'
-          }}>
-            <strong>Note:</strong> Your email address will be used to send you the results of the simulation after it is completed.
           </div>
         </div>
       </div>

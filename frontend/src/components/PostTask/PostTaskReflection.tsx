@@ -242,7 +242,7 @@ const PostTaskReflection: React.FC = () => {
                   Thank you so much for your participation in this research. Your insights and reflections are incredibly valuable to us.
                 </p>
                 <p style={{ fontSize: '15px', color: '#475569', lineHeight: '1.6', marginBottom: '16px' }}>
-                  Shortly, you will receive an email with the results and insights from this research study. We appreciate your time and thoughtful contributions.
+                  Thank you again for your time and thoughtful contributions.
                 </p>
                 <button onClick={() => navigate('/')}>Return Home</button>
               </>
@@ -492,7 +492,7 @@ const PostTaskReflection: React.FC = () => {
                 Thank you so much for your participation in this research. Your insights and reflections are incredibly valuable to us.
               </p>
               <p style={{ fontSize: '15px', color: '#475569', lineHeight: '1.6', marginBottom: '16px' }}>
-                Shortly, you will receive an email with the results and insights from this research study. We appreciate your time and thoughtful contributions.
+                Thank you again for your time and thoughtful contributions.
               </p>
               <button onClick={() => navigate('/')}>Return Home</button>
             </div>

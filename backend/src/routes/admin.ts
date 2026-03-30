@@ -55,7 +55,7 @@ router.post(
           user: {
             id: 'admin',
             role: 'admin',
-            email: 'admin@system'
+            identifier: 'admin'
           }
         }
       });
