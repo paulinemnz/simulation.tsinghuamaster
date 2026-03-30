@@ -240,15 +240,28 @@ router.post(
               const defaultPassword = await bcrypt.hash('auto_created_' + timestamp, 10);
               let userInsert;
               try {
+                // Decide whether we must populate legacy users.email to satisfy NOT NULL (no real email collected)
+                const mustSetLegacyEmail = debugUserSchema?.hasLegacyEmail && debugUserSchema?.legacyEmailNullable === 'NO';
+                const legacyEmailPlaceholder = sanitizedIdentifier; // unique, non-PII, and not a real email address
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'simulations.ts:start-with-mode:userInsertPlan',message:'User insert plan (legacy email handling)',data:{mustSetLegacyEmail,legacyEmailPlaceholderPrefix:legacyEmailPlaceholder.slice(0,24),hasLegacyEmail:debugUserSchema?.hasLegacyEmail||false,legacyEmailNullable:debugUserSchema?.legacyEmailNullable||null},timestamp:Date.now(),runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+                // #endregion
                 // #region agent log
                 fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'simulations.ts:start-with-mode:userInsertAttempt',message:'Attempting INSERT into users',data:{insertColumns:['identifier','password_hash','role','name'],identifierPrefix:String(sanitizedIdentifier).slice(0,24),role:'participant',hasName:!!participantIdInput},timestamp:Date.now(),runId:'pre-fix',hypothesisId:'B'})}).catch(()=>{});
                 // #endregion
-                userInsert = await pool.query(
-                  `INSERT INTO users (identifier, password_hash, role, name)
-                   VALUES ($1, $2, $3, $4)
-                   RETURNING id`,
-                  [sanitizedIdentifier, defaultPassword, 'participant', participantIdInput]
-                );
+                userInsert = mustSetLegacyEmail
+                  ? await pool.query(
+                      `INSERT INTO users (email, identifier, password_hash, role, name)
+                       VALUES ($1, $2, $3, $4, $5)
+                       RETURNING id`,
+                      [legacyEmailPlaceholder, sanitizedIdentifier, defaultPassword, 'participant', participantIdInput]
+                    )
+                  : await pool.query(
+                      `INSERT INTO users (identifier, password_hash, role, name)
+                       VALUES ($1, $2, $3, $4)
+                       RETURNING id`,
+                      [sanitizedIdentifier, defaultPassword, 'participant', participantIdInput]
+                    );
               } catch (insertErr: any) {
                 // #region agent log
                 fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'simulations.ts:start-with-mode:userInsertError',message:'INSERT into users failed',data:{message:insertErr?.message,code:insertErr?.code,detail:insertErr?.detail,constraint:insertErr?.constraint},timestamp:Date.now(),runId:'pre-fix',hypothesisId:'B'})}).catch(()=>{});
