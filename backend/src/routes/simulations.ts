@@ -87,9 +87,19 @@ router.post(
 
       // Ensure the database schema supports identifier-based users (for older DBs created before this change)
       // This is non-destructive and prevents "column identifier does not exist" runtime errors.
+      let debugUserSchema: {
+        hasIdentifier?: boolean;
+        hasLegacyEmail?: boolean;
+        legacyEmailNullable?: string | null;
+        droppedEmailNotNull?: boolean;
+        nulledExistingEmails?: boolean;
+        schemaPatchError?: string | null;
+      } = {};
       try {
         const hasIdentifier = await hasColumn('users', 'identifier');
         const hasLegacyEmail = await hasColumn('users', 'email');
+        debugUserSchema.hasIdentifier = hasIdentifier;
+        debugUserSchema.hasLegacyEmail = hasLegacyEmail;
         // #region agent log
         fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'simulations.ts:start-with-mode:schemaCheck',message:'users schema columns presence',data:{hasIdentifier,hasLegacyEmail},timestamp:Date.now(),runId:'pre-fix',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
@@ -103,9 +113,29 @@ router.post(
              LIMIT 1`
           );
           const isNullable = emailCol.rows?.[0]?.is_nullable;
+          debugUserSchema.legacyEmailNullable = isNullable ?? null;
           // #region agent log
           fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'simulations.ts:start-with-mode:emailNullability',message:'users.email nullability',data:{isNullable},timestamp:Date.now(),runId:'pre-fix',hypothesisId:'A'})}).catch(()=>{});
           // #endregion
+
+          // If legacy email is still NOT NULL, relax it and wipe any stored emails.
+          // This ensures we do not require or store participant emails anywhere.
+          if (isNullable === 'NO') {
+            try {
+              await pool.query('ALTER TABLE users ALTER COLUMN email DROP NOT NULL');
+              debugUserSchema.droppedEmailNotNull = true;
+            } catch (e: any) {
+              debugUserSchema.droppedEmailNotNull = false;
+              debugUserSchema.schemaPatchError = e?.message || 'Failed to drop NOT NULL on users.email';
+            }
+            try {
+              await pool.query('UPDATE users SET email = NULL');
+              debugUserSchema.nulledExistingEmails = true;
+            } catch (e: any) {
+              debugUserSchema.nulledExistingEmails = false;
+              debugUserSchema.schemaPatchError = debugUserSchema.schemaPatchError || (e?.message || 'Failed to null out users.email');
+            }
+          }
         }
         if (!hasIdentifier) {
           console.warn('[API] users.identifier column missing; applying safe runtime schema patch');
@@ -131,6 +161,7 @@ router.post(
         }
       } catch (schemaErr: any) {
         console.warn('[API] Failed to apply runtime schema patch for users.identifier (continuing):', schemaErr?.message);
+        debugUserSchema.schemaPatchError = schemaErr?.message || String(schemaErr);
         // #region agent log
         fetch('http://127.0.0.1:7243/ingest/136ed832-bb29-49e3-961b-4484d95c4711',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'simulations.ts:start-with-mode:schemaPatchError',message:'Runtime schema patch failed',data:{message:schemaErr?.message,code:schemaErr?.code,name:schemaErr?.name},timestamp:Date.now(),runId:'pre-fix',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
@@ -466,9 +497,13 @@ router.post(
           : errorMessage;
       }
 
-      return res.status(500).json({ 
-        ok: false, 
-        error: userFriendlyError 
+      return res.status(500).json({
+        ok: false,
+        error: userFriendlyError,
+        // Include non-PII debug info to diagnose legacy DB schema mismatches in production
+        debug: {
+          userSchema: (typeof debugUserSchema === 'object' ? debugUserSchema : undefined)
+        }
       });
     }
   }
