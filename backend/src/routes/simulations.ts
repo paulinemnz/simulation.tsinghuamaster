@@ -12,6 +12,7 @@ import { pool } from '../database/connection';
 import bcrypt from 'bcryptjs';
 import * as fs from 'fs';
 import * as path from 'path';
+import { hasColumn } from '../database/schemaValidator';
 
 const router = express.Router();
 
@@ -83,6 +84,37 @@ router.post(
       }
 
       console.log('[API] Processing request:', { participantIdInput, mode });
+
+      // Ensure the database schema supports identifier-based users (for older DBs created before this change)
+      // This is non-destructive and prevents "column identifier does not exist" runtime errors.
+      try {
+        const hasIdentifier = await hasColumn('users', 'identifier');
+        if (!hasIdentifier) {
+          console.warn('[API] users.identifier column missing; applying safe runtime schema patch');
+          await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS identifier VARCHAR(255)');
+          // Backfill identifier for existing rows using name, legacy email, or id
+          const hasLegacyEmail = await hasColumn('users', 'email');
+          if (hasLegacyEmail) {
+            await pool.query(
+              `UPDATE users
+               SET identifier = COALESCE(NULLIF(identifier, ''), NULLIF(name, ''), NULLIF(email, ''), id::text)
+               WHERE identifier IS NULL OR identifier = ''`
+            );
+          } else {
+            await pool.query(
+              `UPDATE users
+               SET identifier = COALESCE(NULLIF(identifier, ''), NULLIF(name, ''), id::text)
+               WHERE identifier IS NULL OR identifier = ''`
+            );
+          }
+          // Add uniqueness + not-null (best-effort; don't fail the request if already present)
+          await pool.query(`ALTER TABLE users ALTER COLUMN identifier SET NOT NULL`);
+          await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS users_identifier_unique_idx ON users(identifier)`);
+          await pool.query(`CREATE INDEX IF NOT EXISTS idx_users_identifier ON users(identifier)`);
+        }
+      } catch (schemaErr: any) {
+        console.warn('[API] Failed to apply runtime schema patch for users.identifier (continuing):', schemaErr?.message);
+      }
 
       // Helper function to check if string is a valid UUID
       const isUUID = (str: string): boolean => {

@@ -221,6 +221,9 @@ export class Participant {
   }
 
   static generateParticipantCode(): string {
-    return `P${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+    // Simple anonymous participant code (no email/PII).
+    // Example: ID123456
+    const n = Math.floor(100000 + Math.random() * 900000);
+    return `ID${n}`;
   }
 }
