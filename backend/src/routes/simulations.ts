@@ -58,6 +58,16 @@ router.post(
       mode: req.body.mode
     });
     
+    // Keep this outside the main try/catch so it can be returned in error responses.
+    let debugUserSchema: {
+      hasIdentifier?: boolean;
+      hasLegacyEmail?: boolean;
+      legacyEmailNullable?: string | null;
+      droppedEmailNotNull?: boolean;
+      nulledExistingEmails?: boolean;
+      schemaPatchError?: string | null;
+    } = {};
+
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -87,14 +97,6 @@ router.post(
 
       // Ensure the database schema supports identifier-based users (for older DBs created before this change)
       // This is non-destructive and prevents "column identifier does not exist" runtime errors.
-      let debugUserSchema: {
-        hasIdentifier?: boolean;
-        hasLegacyEmail?: boolean;
-        legacyEmailNullable?: string | null;
-        droppedEmailNotNull?: boolean;
-        nulledExistingEmails?: boolean;
-        schemaPatchError?: string | null;
-      } = {};
       try {
         const hasIdentifier = await hasColumn('users', 'identifier');
         const hasLegacyEmail = await hasColumn('users', 'email');
